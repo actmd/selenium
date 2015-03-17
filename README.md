@@ -1,3 +1,8 @@
+
+NOTE: This fork only changes the three hour timeout constant TIMEOUT_THREE_HOURS to 3 minutes.
+
+There is a precompiled binary attached to the latest release under https://github.com/actmd/selenium/releases 
+
 # Selenium
 
 Selenium is an umbrella project for various tools and libraries that
