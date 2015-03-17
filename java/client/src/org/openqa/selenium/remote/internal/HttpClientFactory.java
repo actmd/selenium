@@ -50,7 +50,7 @@ import java.net.ProxySelector;
 public class HttpClientFactory {
 
   private final CloseableHttpClient httpClient;
-  private final int TIMEOUT_THREE_HOURS = (int) SECONDS.toMillis(60 * 60 * 3);
+  private final int TIMEOUT_THREE_HOURS = (int) SECONDS.toMillis(60 * 3);
   private final HttpClientConnectionManager gridClientConnectionManager =
       getClientConnectionManager();
 
