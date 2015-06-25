@@ -1,3 +1,20 @@
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 package org.openqa.selenium.support.ui;
 
 import static org.junit.Assert.assertEquals;
@@ -11,6 +28,9 @@ import static org.mockito.Mockito.when;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementSelectionStateToBe;
 import static org.openqa.selenium.support.ui.ExpectedConditions.not;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.urlContains;
+import static org.openqa.selenium.support.ui.ExpectedConditions.urlMatches;
+import static org.openqa.selenium.support.ui.ExpectedConditions.urlToBe;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
@@ -55,6 +75,66 @@ public class ExpectedConditionsTest {
     wait = new FluentWait<WebDriver>(mockDriver, mockClock, mockSleeper)
         .withTimeout(1, TimeUnit.SECONDS)
         .pollingEvery(250, TimeUnit.MILLISECONDS);
+  }
+
+  @Test
+  public void waitingForUrlToBeOpened_urlToBe() {
+    final String url = "http://some_url";
+    when(mockDriver.getCurrentUrl()).thenReturn(url);
+    wait.until(urlToBe(url));
+  }
+
+  @Test
+  public void waitingForUrlToBeOpened_urlContains() {
+    final String url = "http://some_url";
+    when(mockDriver.getCurrentUrl()).thenReturn(url);
+    wait.until(urlContains("some_url"));
+  }
+
+  @Test
+  public void waitingForUrlToBeOpened_urlMatches() {
+    final String url = "http://some-dynamic:4000/url";
+    when(mockDriver.getCurrentUrl()).thenReturn(url);
+    wait.until(urlMatches(".*:\\d{4}\\/url"));
+  }
+
+  @Test
+  public void negative_waitingForUrlToBeOpened_urlToBe() {
+    final String url = "http://some_url";
+    when(mockDriver.getCurrentUrl()).thenReturn(url);
+
+    try {
+      wait.until(urlToBe(url + "/malformed"));
+      fail();
+    } catch (TimeoutException ex) {
+      // do nothing
+    }
+  }
+
+  @Test
+  public void negative_waitingForUrlToBeOpened_urlContains() {
+    final String url = "http://some_url";
+    when(mockDriver.getCurrentUrl()).thenReturn(url);
+
+    try {
+      wait.until(urlContains("/malformed"));
+      fail();
+    } catch (TimeoutException ex) {
+      // do nothing
+    }
+  }
+
+  @Test
+  public void negative_waitingForUrlToBeOpened_urlMatches() {
+    final String url = "http://some-dynamic:4000/url";
+    when(mockDriver.getCurrentUrl()).thenReturn(url);
+
+    try {
+      wait.until(urlMatches(".*\\/malformed.*"));
+      fail();
+    } catch (TimeoutException ex) {
+      // do nothing
+    }
   }
 
   @Test

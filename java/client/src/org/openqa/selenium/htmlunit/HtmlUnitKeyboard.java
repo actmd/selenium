@@ -1,18 +1,19 @@
-/*
-Copyright 2007-2010 Selenium committers
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
- */
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 package org.openqa.selenium.htmlunit;
 
@@ -29,12 +30,12 @@ import com.gargoylesoftware.htmlunit.html.HtmlInput;
 import com.gargoylesoftware.htmlunit.html.HtmlPasswordInput;
 import com.gargoylesoftware.htmlunit.html.HtmlTextArea;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
-import com.gargoylesoftware.htmlunit.javascript.host.Event;
-import com.gargoylesoftware.htmlunit.javascript.host.KeyboardEvent;
+import com.gargoylesoftware.htmlunit.javascript.host.event.Event;
+import com.gargoylesoftware.htmlunit.javascript.host.event.KeyboardEvent;
 
 /**
  * Implements keyboard operations using the HtmlUnit WebDriver.
- * 
+ *
  */
 public class HtmlUnitKeyboard implements Keyboard {
   private KeyboardModifiersState modifiersState = new KeyboardModifiersState();
@@ -119,10 +120,7 @@ public class HtmlUnitKeyboard implements Keyboard {
     htmlElement.sendKeyUpEvent(keyToRelease);
   }
 
-  /**
-   * @deprecated Visibility will soon be reduced.
-   */
-  public void performSingleKeyAction(HtmlElement element, CharSequence modifierKey, String eventDescription) {
+  void performSingleKeyAction(HtmlElement element, CharSequence modifierKey, String eventDescription) {
     boolean shiftKey = modifierKey.equals(Keys.SHIFT);
     boolean ctrlKey = modifierKey.equals(Keys.CONTROL);
     boolean altKey = modifierKey.equals(Keys.ALT);

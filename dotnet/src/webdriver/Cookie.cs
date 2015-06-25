@@ -1,9 +1,9 @@
 // <copyright file="Cookie.cs" company="WebDriver Committers">
-// Copyright 2007-2011 WebDriver committers
-// Copyright 2007-2011 Google Inc.
-// Portions copyright 2011 Software Freedom Conservancy
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -171,6 +171,15 @@ namespace OpenQA.Selenium
         }
 
         /// <summary>
+        /// Gets a value indicating whether the cookie is an HTTP-only cookie.
+        /// </summary>
+        [JsonProperty("httpOnly")]
+        public virtual bool IsHttpOnly
+        {
+            get { return false; }
+        }
+
+        /// <summary>
         /// Gets the expiration date of the cookie.
         /// </summary>
         public DateTime? Expiry
@@ -195,7 +204,8 @@ namespace OpenQA.Selenium
 
                 DateTime zeroDate = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
                 TimeSpan span = this.cookieExpiry.Value.ToUniversalTime().Subtract(zeroDate);
-                return Convert.ToInt64(span.TotalSeconds);
+                long totalSeconds = Convert.ToInt64(span.TotalSeconds);
+                return totalSeconds;
             }
         }
 
@@ -249,7 +259,13 @@ namespace OpenQA.Selenium
                 secure = bool.Parse(rawCookie["secure"].ToString());
             }
 
-            return new ReturnedCookie(name, value, domain, path, expires, secure);
+            bool isHttpOnly = false;
+            if (rawCookie.ContainsKey("httpOnly") && rawCookie["httpOnly"] != null)
+            {
+                isHttpOnly = bool.Parse(rawCookie["httpOnly"].ToString());
+            }
+
+            return new ReturnedCookie(name, value, domain, path, expires, secure, isHttpOnly);
         }
 
         /// <summary>
@@ -262,7 +278,6 @@ namespace OpenQA.Selenium
                 + (this.cookieExpiry == null ? string.Empty : "; expires=" + this.cookieExpiry.Value.ToUniversalTime().ToString("ddd MM dd yyyy hh:mm:ss UTC", CultureInfo.InvariantCulture))
                     + (string.IsNullOrEmpty(this.cookiePath) ? string.Empty : "; path=" + this.cookiePath)
                     + (string.IsNullOrEmpty(this.cookieDomain) ? string.Empty : "; domain=" + this.cookieDomain);
-            ////                + (isSecure ? ";secure;" : "");
         }
 
         /// <summary>

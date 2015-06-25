@@ -17,7 +17,6 @@ java/client/src/org/openqa/selenium/ie/IeReturnTypes.java
 javascript/deps.js
 javascript/node/selenium-webdriver/node_modules/
 .idea/vcs.xml
-.idea/misc.xml
 .idea/workspace.xml
 .idea/dictionaries/
 .idea/scopes/
@@ -26,6 +25,7 @@ out
 cpp/IEDriver/sizzle.h
 third_party/gecko-*
 cpp/iedriver/Generated/atoms.h
+cpp/iedriver/sizzle.h
 chromedriver.log
 junit*.properties
 WebDriver.suo
@@ -39,6 +39,7 @@ maven/*/src
 maven/target
 maven/*/target
 java/client/build/
+java/client/log.txt
 java/server/build/
 *.pyc
 dist/
@@ -66,3 +67,7 @@ GSYMS
 GTAGS
 Gemfile.lock
 /rb/.bundle
+.sonar/
+.idea/sonarIssues.xml
+.idea/inspectionProfiles/profiles_settings.xml
+.idea/inspectionProfiles/Project_Default.xml

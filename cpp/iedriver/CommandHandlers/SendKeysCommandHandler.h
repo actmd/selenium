@@ -1,5 +1,8 @@
-// Copyright 2011 Software Freedom Conservancy
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -77,20 +80,6 @@ class SendKeysCommandHandler : public IECommandHandler {
       status_code = this->GetElement(executor, element_id, &element_wrapper);
 
       if (status_code == WD_SUCCESS) {
-        bool displayed;
-        status_code = element_wrapper->IsDisplayed(&displayed);
-        if (status_code != WD_SUCCESS || !displayed) {
-          response->SetErrorResponse(EELEMENTNOTDISPLAYED,
-                                     "Element is not displayed");
-          return;
-        }
-
-        if (!element_wrapper->IsEnabled()) {
-          response->SetErrorResponse(EELEMENTNOTENABLED,
-                                     "Element is not enabled");
-          return;
-        }
-
         CComPtr<IHTMLElement> element(element_wrapper->element());
 
         LocationInfo location = {};
@@ -141,6 +130,20 @@ class SendKeysCommandHandler : public IECommandHandler {
           // We're now blocked until the dialog closes.
           ::CloseHandle(thread_handle);
           response->SetSuccessResponse(Json::Value::null);
+          return;
+        }
+
+        bool displayed;
+        status_code = element_wrapper->IsDisplayed(true, &displayed);
+        if (status_code != WD_SUCCESS || !displayed) {
+          response->SetErrorResponse(EELEMENTNOTDISPLAYED,
+                                     "Element is not displayed");
+          return;
+        }
+
+        if (!element_wrapper->IsEnabled()) {
+          response->SetErrorResponse(EELEMENTNOTENABLED,
+                                     "Element is not enabled");
           return;
         }
 

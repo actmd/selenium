@@ -14,7 +14,7 @@ that lets you write interchangable code for all major web browsers.
 The project is made possible by volunteer contributors who have put in
 thousands of hours of their own time, and made the source code freely
 available under the [Apache 2.0
-license](https://github.com/SeleniumHQ/selenium/blob/master/COPYING).
+license](https://github.com/SeleniumHQ/selenium/blob/master/LICENSE).
 
 ## Documentation
 
@@ -38,7 +38,7 @@ See [CONTRIBUTING.md](https://github.com/SeleniumHQ/selenium/blob/master/CONTRIB
 ## Building
 
 Selenium uses a custom build system aptly named
-[crazyfun](https://github.com/SeleniumHQ/selenium/wiki/CrazyFunBuild)
+[crazyfun](https://github.com/SeleniumHQ/selenium/wiki/Crazy-Fun-Build)
 available on all fine platforms (Linux, Mac, Windows).  We are in the
 process of replacing this with
 [buck](http://facebook.github.io/buck/), so don't be alarmed if you
@@ -66,7 +66,7 @@ In this case, `javascript/atoms` is the module directory,
 and `run` is the action to run on that target.
 
 As you see *build targets* scroll past in the log,
-you may want to run them individually. 
+you may want to run them individually.
 crazyfun can run them individually,
 by target name as long as `:run` is appended (see above).
 
@@ -114,7 +114,7 @@ from https://github.com/facebook/watchman
 
 ## Requirements
 
-* [Java 6 JDK](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
+* [Java 7 JDK](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 * `java` and `jar` on the PATH
 
 Although the build system is based on rake it's **strongly advised**
@@ -122,8 +122,8 @@ to rely on the version of JRuby in `third_party/` that is invoked by
 `go`.  The only developer type who would want to deviate from this is
 the “build maintainer” who's experimenting with a JRuby upgrade.
 
-Note that all Selenium Java artefacts are **built with Java 6
-(mandatory)**.  Those _will work with any Java >= 6_.
+Note that all Selenium Java artefacts are **built with Java 7
+(mandatory)**.  Those _will work with any Java >= 7_.
 
 ### Optional Requirements
 
@@ -269,7 +269,7 @@ build/java/client/src/org/openqa/selenium/selenium-api.jar
 
 If you watch the build, each step should print where its output is
 going.  Java test outputs appear in one of two places: either under
-`build/test_logs` for [JUnit](http://junit.sourceforge.net/) or in
+`build/test_logs` for [JUnit](http://junit.org/) or in
 `build/build_log.xml` for [TestNG](http://testng.org/doc/index.html)
 tests.  If you'd like the build to be chattier, just append `log=true`
 to the build command line.
@@ -290,7 +290,7 @@ targets.
 ## Maven _per se_
 
 If it is not clear already, Selenium is not built with Maven, it is
-built with [Crazy-Fun](https://github.com/SeleniumHQ/selenium/wiki/CrazyFunBuild) though
+built with [Crazy-Fun](https://github.com/SeleniumHQ/selenium/wiki/Crazy-Fun-Build) though
 that is invoked with *go* as outlined above so you do not really have
 to learn too much about that.
 
@@ -307,12 +307,12 @@ cd maven
 mvn clean install
 ```
 
-This sequence will push some seven or so jars into you local Maven
+This sequence will push some seven or so jars into your local Maven
 repository with something like 'selenium-server-2.0-SNAPSHOT.jar' as
 the name.
 
 ## Useful Resources
 
 Refer to the [Building Web
-Driver](https://github.com/SeleniumHQ/selenium/wiki/BuildingWebDriver) wiki
+Driver](https://github.com/SeleniumHQ/selenium/wiki/Building-WebDriver) wiki
 page for the last word on building the bits and pieces of Selenium.

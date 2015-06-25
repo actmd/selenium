@@ -1,33 +1,30 @@
-/*
- Copyright 2013 Selenium committers
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
- http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- */
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 package org.openqa.selenium.safari;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
 
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -97,18 +94,6 @@ public class SafariOptions {
 
   // Setters
 
-  /** @deprecated This method is now a no-op and will be removed in 2.46.0. */
-  public void addExtensions(File... paths) {}
-
-  /** @deprecated This method is now a no-op and will be removed in 2.46.0. */
-  public void addExtensions(List<File> paths) {}
-
-  /** @deprecated This method is now a no-op and will be removed in 2.46.0. */
-  public void setDataDir(File dataDir) {}
-
-  /** @deprecated This method is now a no-op and will be removed in 2.46.0. */
-  public void setDriverExtension(File driverExtension) {}
-
   /**
    * Set the port the {@link SafariDriverServer} should be started on. Defaults to 0, in which case
    * the server selects a free port.
@@ -119,9 +104,6 @@ public class SafariOptions {
   public void setPort(int port) {
     this.port = port;
   }
-
-  /** @deprecated This method is now a no-op and will be removed in 2.46.0. */
-  public void setSkipExtensionInstallation(boolean skipExtensionInstallation) {}
 
   /**
    * Instruct the SafariDriver to delete all existing session data when starting a new session.
@@ -139,16 +121,6 @@ public class SafariOptions {
 
   // Getters
 
-  /** @deprecated This method is now a no-op and will be removed in 2.46.0. */
-  public Optional<File> getDataDir() {
-    return Optional.absent();
-  }
-
-  /** @deprecated This method is now a no-op and will be removed in 2.46.0. */
-  public List<File> getExtensions() {
-    return ImmutableList.of();
-  }
-
   /**
    * @return The port the {@link SafariDriverServer} should be started on.
    *    If 0, the server should select a free port.
@@ -156,16 +128,6 @@ public class SafariOptions {
    */
   public int getPort() {
     return port;
-  }
-
-  /** @deprecated This method is now a no-op and will be removed in 2.46.0. */
-  public boolean getSkipExtensionInstallation() {
-    return false;
-  }
-
-  /** @deprecated This method is now a no-op and will be removed in 2.46.0. */
-  public boolean getUseCustomDriverExtension() {
-    return false;
   }
 
   /**

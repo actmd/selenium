@@ -1,5 +1,8 @@
-// Copyright 2011 Software Freedom Conservancy
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -122,6 +125,7 @@ LRESULT IECommandExecutor::OnCreate(UINT uMsg,
   this->async_script_timeout_ = -1;
   this->page_load_timeout_ = -1;
   this->is_waiting_ = false;
+  this->page_load_strategy_ = "normal";
 
   this->input_manager_ = new InputManager();
   this->input_manager_->Initialize(&this->managed_elements_);
@@ -217,7 +221,7 @@ LRESULT IECommandExecutor::OnWait(UINT uMsg,
       this->is_waiting_ = false;
       browser->set_wait_required(false);
     } else {
-      this->is_waiting_ = !(browser->Wait());
+      this->is_waiting_ = !(browser->Wait(this->page_load_strategy_));
       if (this->is_waiting_) {
         // If we are still waiting, we need to wait a bit then post a message to
         // ourselves to run the wait again. However, we can't wait using Sleep()
@@ -671,6 +675,10 @@ int IECommandExecutor::CreateNewBrowser(std::string* error_message) {
                                     this->m_hWnd));
 
   this->AddManagedBrowser(wrapper);
+  bool is_busy = wrapper->IsBusy();
+  if (is_busy) {
+    LOG(WARN) << "Browser was launched and attached to, but is still busy.";
+  }
   return WD_SUCCESS;
 }
 

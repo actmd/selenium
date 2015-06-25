@@ -1,9 +1,9 @@
 ﻿// <copyright file="InternetExplorerOptions.cs" company="WebDriver Committers">
-// Copyright 2007-2011 WebDriver committers
-// Copyright 2007-2011 Google Inc.
-// Portions copyright 2011 Software Freedom Conservancy
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -67,6 +67,32 @@ namespace OpenQA.Selenium.IE
     }
 
     /// <summary>
+    /// Specifies the behavior of waiting for page loads in the IE driver.
+    /// </summary>
+    public enum InternetExplorerPageLoadStrategy
+    {
+        /// <summary>
+        /// Indicates the behavior is not set.
+        /// </summary>
+        Default,
+
+        /// <summary>
+        /// Waits for pages to load and ready state to be 'complete'.
+        /// </summary>
+        Normal,
+
+        /// <summary>
+        /// Waits for pages to load and for ready state to be 'interactive' or 'complete'.
+        /// </summary>
+        Eager,
+
+        /// <summary>
+        /// Does not wait for pages to load, returning immediately.
+        /// </summary>
+        None
+    }
+
+    /// <summary>
     /// Class to manage options specific to <see cref="InternetExplorerDriver"/>
     /// </summary>
     /// <example>
@@ -118,6 +144,7 @@ namespace OpenQA.Selenium.IE
         private string browserCommandLineArguments = string.Empty;
         private InternetExplorerElementScrollBehavior elementScrollBehavior = InternetExplorerElementScrollBehavior.Top;
         private InternetExplorerUnexpectedAlertBehavior unexpectedAlertBehavior = InternetExplorerUnexpectedAlertBehavior.Default;
+        private InternetExplorerPageLoadStrategy pageLoadStrategy = InternetExplorerPageLoadStrategy.Default;
         private Proxy proxy;
         private Dictionary<string, object> additionalCapabilities = new Dictionary<string, object>();
 
@@ -191,6 +218,16 @@ namespace OpenQA.Selenium.IE
         {
             get { return this.unexpectedAlertBehavior; }
             set { this.unexpectedAlertBehavior = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the value for describing how the browser is to wait for pages to load in the IE driver.
+        /// Defaults to <see cref="InternetExplorerPageLoadStrategy.Default"/>.
+        /// </summary>
+        public InternetExplorerPageLoadStrategy PageLoadStrategy
+        {
+            get { return this.pageLoadStrategy; }
+            set { this.pageLoadStrategy = value; }
         }
 
         /// <summary>
@@ -321,7 +358,8 @@ namespace OpenQA.Selenium.IE
                 capabilityName == CapabilityType.Proxy ||
                 capabilityName == UsePerProcessProxyCapability ||
                 capabilityName == EnsureCleanSessionCapability ||
-                capabilityName == ValidateCookieDocumentTypeCapability)
+                capabilityName == ValidateCookieDocumentTypeCapability ||
+                capabilityName == CapabilityType.PageLoadStrategy)
             {
                 string message = string.Format(CultureInfo.InvariantCulture, "There is already an option for the {0} capability. Please use that instead.", capabilityName);
                 throw new ArgumentException(message, "capabilityName");
@@ -387,6 +425,23 @@ namespace OpenQA.Selenium.IE
                 }
 
                 capabilities.SetCapability(CapabilityType.UnexpectedAlertBehavior, unexpectedAlertBehaviorSetting);
+            }
+
+            if (this.pageLoadStrategy != InternetExplorerPageLoadStrategy.Default)
+            {
+                string pageLoadStrategySetting = "normal";
+                switch (this.pageLoadStrategy)
+                {
+                    case InternetExplorerPageLoadStrategy.Eager:
+                        pageLoadStrategySetting = "eager";
+                        break;
+
+                    case InternetExplorerPageLoadStrategy.None:
+                        pageLoadStrategySetting = "none";
+                        break;
+                }
+
+                capabilities.SetCapability(CapabilityType.PageLoadStrategy, pageLoadStrategySetting);
             }
 
             if (this.browserAttachTimeout != TimeSpan.MinValue)

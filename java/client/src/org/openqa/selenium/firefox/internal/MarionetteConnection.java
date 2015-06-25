@@ -1,31 +1,32 @@
-/*
-Copyright 2007-2010 Selenium committers
-Portions copyright 2011 Software Freedom Conservancy
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
- */
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 package org.openqa.selenium.firefox.internal;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import org.openqa.selenium.Beta;
 import org.openqa.selenium.WebDriverException;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.ExtensionConnection;
 import org.openqa.selenium.firefox.FirefoxBinary;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.internal.Lock;
 import org.openqa.selenium.logging.LocalLogs;
@@ -47,6 +48,8 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.net.ConnectException;
 import java.net.Socket;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
@@ -60,6 +63,7 @@ public class MarionetteConnection implements ExtensionConnection, NeedsLocalLogs
   private final String host;
   private final Lock lock;
   private File profileDir;
+  private int port;
 
   private static Map<String, String> seleniumToMarionetteCommandMap = ImmutableMap.<String, String>builder()
       .put(DriverCommand.GET, "get")
@@ -76,6 +80,10 @@ public class MarionetteConnection implements ExtensionConnection, NeedsLocalLogs
       .put(DriverCommand.GET_ELEMENT_LOCATION, "getElementPosition")
       .put(DriverCommand.GET_ALL_COOKIES, "getAllCookies")
       .put(DriverCommand.QUIT, "deleteSession")
+      .put(DriverCommand.MOVE_TO, "move")
+      .put(DriverCommand.MOUSE_DOWN, "press")
+      .put(DriverCommand.MOUSE_UP, "release")
+      .put(DriverCommand.CLICK, "click")
       .build();
 
   private Socket socket;
@@ -96,7 +104,7 @@ public class MarionetteConnection implements ExtensionConnection, NeedsLocalLogs
   }
 
   public void start() throws IOException {
-    int port = PortProber.findFreePort();
+    port = PortProber.findFreePort();
 
     profile.setPreference("marionette.defaultPrefs.enabled", true);
     profile.setPreference("marionette.defaultPrefs.port", port);
@@ -106,9 +114,7 @@ public class MarionetteConnection implements ExtensionConnection, NeedsLocalLogs
     try {
       profileDir = profile.layoutOnDisk();
 
-      process.clean(profile, profileDir);
-
-      String firefoxLogFile = System.getProperty("webdriver.firefox.logfile");
+      String firefoxLogFile = System.getProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE);
 
       if (firefoxLogFile !=  null) {
         if ("/dev/stdout".equals(firefoxLogFile)) {
@@ -142,13 +148,12 @@ public class MarionetteConnection implements ExtensionConnection, NeedsLocalLogs
         }
       }
     } catch (IOException e) {
-      e.printStackTrace();
       throw new WebDriverException(
-          String.format("Failed to connect to binary %s on port %d; process output follows: \n%s",
+          String.format("Failed to connect to binary %s on port %d; process output follows: %n%s",
               process.toString(), port, process.getConsoleOutput()), e);
     } catch (WebDriverException e) {
       throw new WebDriverException(
-          String.format("Failed to connect to binary %s on port %d; process output follows: \n%s",
+          String.format("Failed to connect to binary %s on port %d; process output follows: %n%s",
               process.toString(), port, process.getConsoleOutput()), e);
     } catch (Exception e) {
       throw new WebDriverException(e);
@@ -158,7 +163,7 @@ public class MarionetteConnection implements ExtensionConnection, NeedsLocalLogs
 
     // Marionette sends back an initial acknowledgement response upon first
     // connect. We need to read that response before we can proceed.
-    String rawResponse = receiveResponse();
+    String ignored = receiveResponse();
 
     // This initializes the "actor" for future communication with this instance.
     sendCommand(serializeCommand(new Command(null, "getMarionetteID")));
@@ -197,39 +202,11 @@ public class MarionetteConnection implements ExtensionConnection, NeedsLocalLogs
       response.setValue(map.get("value"));
 
     } else {
+      response = new JsonToBeanConverter().convert(Response.class, rawResponse);
       if (map.containsKey("error")) {
-        // ***************************************************************
-        // Marionette Compliance Issue: Error responses should, at a
-        // minimum, put the status property at the root of the object.
-        // In other words:
-        // {
-        //   status: 7,
-        //   value:
-        //   {
-        //     message: "Did not find element with id=foo",
-        //     stackTrace: <stack trace goes here>
-        //   }
-        // }
-        // ***************************************************************
-        response = new Response();
-        Object value = map.get("error");
-        if (value != null) {
-          if (value instanceof Map) {
-            Map<String, Object> errorMap = (Map<String, Object>) value;
-            if (errorMap != null) {
-              response.setStatus(Integer.parseInt(errorMap.get("status").toString()));
-              errorMap.remove("status");
-              response.setValue(errorMap);
-            }
-          } else {
-            response.setStatus(ErrorCodes.UNHANDLED_ERROR);
-            response.setValue(value + ": " + map.get("message"));
-          }
-        }
+        response.setValue(map.get("error"));
 
       } else {
-        response = new JsonToBeanConverter().convert(Response.class, rawResponse);
-
         // ***************************************************************
         // Marionette Compliance Issue: Responses from findElements
         // are returned with raw element IDs as the value.
@@ -256,7 +233,6 @@ public class MarionetteConnection implements ExtensionConnection, NeedsLocalLogs
   }
 
   private String serializeCommand(Command command) {
-//    System.out.println("Command " + command);
     String commandName = command.getName();
     Map<String, Object> params = Maps.newHashMap();
     params.putAll(command.getParameters());
@@ -282,8 +258,9 @@ public class MarionetteConnection implements ExtensionConnection, NeedsLocalLogs
             || DriverCommand.MOUSE_DOWN.equals(commandName)
             || DriverCommand.MOUSE_UP.equals(commandName)
             || DriverCommand.MOVE_TO.equals(commandName)) {
-      String actionName = commandName;
-      commandName = "actionChain";
+      String actionName = seleniumToMarionetteCommandMap.containsKey(commandName) ?
+                          seleniumToMarionetteCommandMap.get(commandName) : commandName;
+      commandName = DriverCommand.ACTION_CHAIN;
       List<Object> action = Lists.newArrayList();
       action.add(actionName);
       if (params.containsKey("element")) {
@@ -368,7 +345,6 @@ public class MarionetteConnection implements ExtensionConnection, NeedsLocalLogs
       reader.close();
       socket.close();
     } catch (IOException e) {
-      e.printStackTrace();
     }
     socket = null;
     // This should only be called after the QUIT command has been sent,
@@ -385,5 +361,16 @@ public class MarionetteConnection implements ExtensionConnection, NeedsLocalLogs
 
   public void setLocalLogs(LocalLogs logs) {
     this.logs = logs;
+  }
+
+  public URI getAddressOfRemoteServer() {
+    Preconditions.checkState(host == null, "The host must be non-null.");
+    Preconditions.checkState(port != 0, "The port must be non-0.");
+
+    try {
+      return new URI("net.tcp://" + host + ":" + port);
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

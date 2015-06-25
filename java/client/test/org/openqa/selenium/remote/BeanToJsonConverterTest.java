@@ -1,21 +1,23 @@
-/*
-Copyright 2007-2009 Selenium committers
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
- */
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 package org.openqa.selenium.remote;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -227,6 +229,30 @@ public class BeanToJsonConverterTest {
   public void testShouldCallToJsonMethodIfPresent() {
     String json = new BeanToJsonConverter().convert(new JsonAware("converted"));
     assertEquals("\"converted\"", json);
+  }
+
+  @Test
+  public void testShouldCallAsMapMethodIfPresent() {
+    String json = new BeanToJsonConverter().convert(new Mappable1("a key", "a value"));
+    assertEquals("{\"a key\":\"a value\"}", json);
+  }
+
+  @Test
+  public void testShouldCallToMapMethodIfPresent() {
+    String json = new BeanToJsonConverter().convert(new Mappable2("a key", "a value"));
+    assertEquals("{\"a key\":\"a value\"}", json);
+  }
+
+  @Test
+  public void testShouldCallAsListMethodIfPresent() {
+    String json = new BeanToJsonConverter().convert(new Listable1("item1", "item2"));
+    assertEquals("[\"item1\",\"item2\"]", json);
+  }
+
+  @Test
+  public void testShouldCallToListMethodIfPresent() {
+    String json = new BeanToJsonConverter().convert(new Listable2("item1", "item2"));
+    assertEquals("[\"item1\",\"item2\"]", json);
   }
 
   @Test
@@ -521,4 +547,57 @@ public class BeanToJsonConverterTest {
       return convertedValue;
     }
   }
+
+  public class Mappable1 {
+    private String key;
+    private Object value;
+
+    public Mappable1(String key, Object value) {
+      this.key = key;
+      this.value = value;
+    }
+
+    public Map<String, Object> asMap() {
+      return ImmutableMap.of(key, value);
+    }
+  }
+
+  public class Mappable2 {
+    private String key;
+    private Object value;
+
+    public Mappable2(String key, Object value) {
+      this.key = key;
+      this.value = value;
+    }
+
+    public Map<String, Object> toMap() {
+      return ImmutableMap.of(key, value);
+    }
+  }
+
+  public class Listable1 {
+    private List<String> items;
+
+    public Listable1(String... items) {
+      this.items = ImmutableList.copyOf(items);
+    }
+
+    public List<String> asList() {
+      return items;
+    }
+  }
+
+  public class Listable2 {
+    private List<String> items;
+
+    public Listable2(String... items) {
+      this.items = ImmutableList.copyOf(items);
+    }
+
+    public List<String> toList() {
+      return items;
+    }
+  }
+
 }

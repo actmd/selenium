@@ -1,44 +1,29 @@
-/*
-Copyright 2007-2009 Selenium committers
-Portions copyright 2011 Software Freedom Conservancy
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
- */
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 
 package org.openqa.selenium.htmlunit;
 
-import com.google.common.base.Strings;
-import com.google.common.base.Throwables;
-
-import com.gargoylesoftware.htmlunit.ScriptResult;
-import com.gargoylesoftware.htmlunit.html.DomElement;
-import com.gargoylesoftware.htmlunit.html.DomNode;
-import com.gargoylesoftware.htmlunit.html.DomText;
-import com.gargoylesoftware.htmlunit.html.HtmlButton;
-import com.gargoylesoftware.htmlunit.html.HtmlElement;
-import com.gargoylesoftware.htmlunit.html.HtmlForm;
-import com.gargoylesoftware.htmlunit.html.HtmlImageInput;
-import com.gargoylesoftware.htmlunit.html.HtmlInput;
-import com.gargoylesoftware.htmlunit.html.HtmlLabel;
-import com.gargoylesoftware.htmlunit.html.HtmlOption;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.gargoylesoftware.htmlunit.html.HtmlPreformattedText;
-import com.gargoylesoftware.htmlunit.html.HtmlScript;
-import com.gargoylesoftware.htmlunit.html.HtmlSelect;
-import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
-import com.gargoylesoftware.htmlunit.html.HtmlTextArea;
-import com.gargoylesoftware.htmlunit.javascript.host.Event;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.Callable;
 
 import net.sourceforge.htmlunit.corejs.javascript.Undefined;
 
@@ -65,12 +50,25 @@ import org.openqa.selenium.internal.WrapsElement;
 import org.w3c.dom.Attr;
 import org.w3c.dom.NamedNodeMap;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.Callable;
+import com.gargoylesoftware.htmlunit.ScriptResult;
+import com.gargoylesoftware.htmlunit.html.DomNode;
+import com.gargoylesoftware.htmlunit.html.DomText;
+import com.gargoylesoftware.htmlunit.html.HtmlButton;
+import com.gargoylesoftware.htmlunit.html.HtmlElement;
+import com.gargoylesoftware.htmlunit.html.HtmlForm;
+import com.gargoylesoftware.htmlunit.html.HtmlImageInput;
+import com.gargoylesoftware.htmlunit.html.HtmlInput;
+import com.gargoylesoftware.htmlunit.html.HtmlLabel;
+import com.gargoylesoftware.htmlunit.html.HtmlOption;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.html.HtmlPreformattedText;
+import com.gargoylesoftware.htmlunit.html.HtmlScript;
+import com.gargoylesoftware.htmlunit.html.HtmlSelect;
+import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
+import com.gargoylesoftware.htmlunit.html.HtmlTextArea;
+import com.gargoylesoftware.htmlunit.javascript.host.event.Event;
+import com.google.common.base.Strings;
+import com.google.common.base.Throwables;
 
 
 public class HtmlUnitWebElement implements WrapsDriver,
@@ -148,13 +146,6 @@ public class HtmlUnitWebElement implements WrapsDriver,
       // element not visible either
     }
 
-    if (element instanceof HtmlButton) {
-      String type = element.getAttribute("type");
-      if (type == DomElement.ATTRIBUTE_NOT_DEFINED || type == DomElement.ATTRIBUTE_VALUE_EMPTY) {
-        element.setAttribute("type", "submit");
-      }
-    }
-
     HtmlUnitMouse mouse = (HtmlUnitMouse) parent.getMouse();
     mouse.click(getCoordinates());
 
@@ -209,7 +200,7 @@ public class HtmlUnitWebElement implements WrapsDriver,
         continue;
       }
 
-      if (isBefore(submit)) {
+      if (submit == null) {
         submit = element;
       }
     }
@@ -246,10 +237,6 @@ public class HtmlUnitWebElement implements WrapsDriver,
     }
 
     return candidate != null;
-  }
-
-  private boolean isBefore(HtmlElement submit) {
-    return submit == null;
   }
 
   @Override
@@ -317,17 +304,11 @@ public class HtmlUnitWebElement implements WrapsDriver,
     element.focus();
   }
 
-  /**
-   * @deprecated Visibility will soon be reduced.
-   */
-  public void sendKeyDownEvent(CharSequence modifierKey) {
+  void sendKeyDownEvent(CharSequence modifierKey) {
     sendSingleKeyEvent(modifierKey, Event.TYPE_KEY_DOWN);
   }
 
-  /**
-   * @deprecated Visibility will soon be reduced.
-   */
-  public void sendKeyUpEvent(CharSequence modifierKey) {
+  void sendKeyUpEvent(CharSequence modifierKey) {
     sendSingleKeyEvent(modifierKey, Event.TYPE_KEY_UP);
   }
 
@@ -436,14 +417,14 @@ public class HtmlUnitWebElement implements WrapsDriver,
         return ((HtmlTextArea) element).getText();
       }
 
-      // According to 
+      // According to
       // http://www.w3.org/TR/1999/REC-html401-19991224/interact/forms.html#adef-value-OPTION
-      // if the value attribute doesn't exist, getting the "value" attribute defers to the 
+      // if the value attribute doesn't exist, getting the "value" attribute defers to the
       // option's content.
       if (element instanceof HtmlOption && !element.hasAttribute("value")) {
     	  return element.getTextContent();
       }
-      
+
       return value == null ? "" : value;
     }
 
@@ -494,10 +475,6 @@ public class HtmlUnitWebElement implements WrapsDriver,
   @Override
   public boolean isDisplayed() {
     assertElementNotStale();
-
-    if (!parent.isJavascriptEnabled()) {
-      return true;
-    }
 
     return element.isDisplayed();
   }
@@ -950,7 +927,7 @@ public class HtmlUnitWebElement implements WrapsDriver,
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see org.openqa.selenium.internal.WrapsDriver#getContainingDriver()
    */
   @Override

@@ -1,9 +1,9 @@
 // <copyright file="SelectElement.cs" company="WebDriver Committers">
-// Copyright 2007-2011 WebDriver committers
-// Copyright 2007-2011 Google Inc.
-// Portions copyright 2011 Software Freedom Conservancy
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -20,13 +20,14 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using OpenQA.Selenium.Internal;
 
 namespace OpenQA.Selenium.Support.UI
 {
     /// <summary>
     /// Provides a convenience method for manipulating selections of options in an HTML select element.
     /// </summary>
-    public class SelectElement
+    public class SelectElement : IWrapsElement
     {
         private readonly IWebElement element;
 
@@ -53,6 +54,14 @@ namespace OpenQA.Selenium.Support.UI
             // let check if it's a multiple
             string attribute = element.GetAttribute("multiple");
             this.IsMultiple = attribute != null && attribute.ToLowerInvariant() != "false";
+        }
+
+        /// <summary>
+        /// Gets the <see cref="IWebElement"/> wrapped by this object.
+        /// </summary>
+        public IWebElement WrappedElement
+        {
+            get { return this.element; }
         }
 
         /// <summary>

@@ -1,9 +1,9 @@
 ﻿// <copyright file="DriverService.cs" company="WebDriver Committers">
-// Copyright 2007-2011 WebDriver committers
-// Copyright 2007-2011 Google Inc.
-// Portions copyright 2011 Software Freedom Conservancy
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -17,14 +17,11 @@
 // </copyright>
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Net;
-using System.Net.Sockets;
 using System.Security.Permissions;
-using System.Text;
 using OpenQA.Selenium.Internal;
 using OpenQA.Selenium.Remote;
 
@@ -181,22 +178,39 @@ namespace OpenQA.Selenium
             this.driverServiceProcess.StartInfo.UseShellExecute = false;
             this.driverServiceProcess.StartInfo.CreateNoWindow = this.hideCommandPromptWindow;
             this.driverServiceProcess.Start();
-            Uri serviceHealthUri = new Uri(this.ServiceUrl, new Uri("status", UriKind.Relative));
+            Uri serviceHealthUri = new Uri(this.ServiceUrl, new Uri(DriverCommand.Status, UriKind.Relative));
             bool processStarted = false;
             DateTime timeout = DateTime.Now.Add(TimeSpan.FromSeconds(20));
             while (!processStarted && DateTime.Now < timeout)
             {
                 try
                 {
+                    // If the driver service process has exited, we can exit early.
+                    if (this.driverServiceProcess.HasExited)
+                    {
+                        break;
+                    }
+
                     HttpWebRequest request = HttpWebRequest.Create(serviceHealthUri) as HttpWebRequest;
                     request.KeepAlive = false;
                     HttpWebResponse response = request.GetResponse() as HttpWebResponse;
+
+                    // Checking the response from the 'status' end point. Note that we are simply checking
+                    // that the HTTP status returned is a 200 status, and that the resposne has the correct
+                    // Content-Type header. A more sophisticated check would parse the JSON response and
+                    // validate its values. At the moment we do not do this more sophisticated check.
+                    processStarted = response.StatusCode == HttpStatusCode.OK && response.ContentType.StartsWith("application/json", StringComparison.OrdinalIgnoreCase);
                     response.Close();
-                    processStarted = true;
                 }
                 catch (WebException)
                 {
                 }
+            }
+
+            if (!processStarted)
+            {
+                string msg = "Cannot start the driver service on " + this.ServiceUrl;
+                throw new WebDriverException(msg);
             }
         }
 

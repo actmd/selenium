@@ -1,5 +1,8 @@
-// Copyright 2011 Software Freedom Conservancy
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -48,7 +51,7 @@ class HtmlDialog : public DocumentHost, public IDispEventSimpleImpl<1, HtmlDialo
 
   void GetDocument(IHTMLDocument2** doc);
   void Close(void);
-  bool Wait(void);
+  bool Wait(const std::string& page_load_strategy);
   bool IsBusy(void);
   HWND GetContentWindowHandle(void);
   HWND GetBrowserWindowHandle(void);

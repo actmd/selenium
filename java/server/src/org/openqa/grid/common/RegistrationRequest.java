@@ -1,29 +1,32 @@
-/*
-Copyright 2011 Selenium committers
-Copyright 2011 Software Freedom Conservancy
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 package org.openqa.grid.common;
 
-import com.google.common.collect.Maps;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 import org.openqa.grid.common.exception.GridConfigurationException;
 import org.openqa.grid.common.exception.GridException;
@@ -36,16 +39,13 @@ import org.openqa.selenium.server.RemoteControlConfiguration;
 import org.openqa.selenium.server.browserlaunchers.BrowserLauncherFactory;
 import org.openqa.selenium.server.cli.RemoteControlLauncher;
 
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
+import com.google.common.collect.Maps;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 
 /**
  * helper to register to the grid. Using JSON to exchange the object between the node and grid.
@@ -62,7 +62,7 @@ public class RegistrationRequest {
 
   private String[] args;
 
-  private static final Logger log = Logger.getLogger(RegistrationRequest.class.getName());
+  private static final Logger LOG = Logger.getLogger(RegistrationRequest.class.getName());
 
   // some special param for capability
   public static final String APP = "applicationName";
@@ -195,8 +195,10 @@ public class RegistrationRequest {
     }
     try {
       return Integer.parseInt(o.toString());
-    } catch (Throwable t) {
-      log.warning("Error. " + param + " is supposed to be an int. Keeping default of " + defaultValue);
+    } catch (NumberFormatException t) {
+      LOG.warning(String.format(
+        "Parameter %s has value '%s', but it is supposed to be an int. Keeping default of %s",
+        param, o, defaultValue));
       return defaultValue;
     }
 
@@ -248,7 +250,7 @@ public class RegistrationRequest {
 
   /**
    * Create an object from a registration request formatted as a json string.
-   * 
+   *
    * @param json
    * @return create a request from the JSON request received.
    */
@@ -292,7 +294,7 @@ public class RegistrationRequest {
   /**
    * if a PROXY_CLASS is specified in the request, the proxy created following this request will be
    * of that type. If nothing is specified, it will use RemoteProxy
-   * 
+   *
    * @return null if no class was specified.
    */
   public String getRemoteProxyClass() {
@@ -321,7 +323,7 @@ public class RegistrationRequest {
         registrationInfo.put(URLDecoder.decode(configItem[0], "UTF-8"),
             URLDecoder.decode(configItem[1], "UTF-8"));
       } catch (UnsupportedEncodingException e) {
-        log.warning(String.format("Unable to decode registration request portion: %s", part));
+        LOG.warning(String.format("Unable to decode registration request portion: %s", part));
       }
     }
 
@@ -351,13 +353,6 @@ public class RegistrationRequest {
     }
   }
 
-  // TODO freynaud : this is only used in tests. Move the method ?
-  public static RegistrationRequest localWebdriverNoCapabilities() {
-    RegistrationRequest res = build("-role", "webdriver","-host","localhost");
-    res.capabilities.clear();
-    return res;
-  }
-
   public static RegistrationRequest build(String... args) {
     RegistrationRequest res = new RegistrationRequest();
     res.args = args;
@@ -366,17 +361,15 @@ public class RegistrationRequest {
 
     res.role = GridRole.find(args);
 
-
     String defaultConfig = "defaults/DefaultNode.json";
     String nodeType = helper.getParamValue("-role");
-    if (GridRole.RCAliases().contains(nodeType)) {
+    if (GridRole.isRC(nodeType)) {
       defaultConfig = "defaults/DefaultNodeSelenium.json";
     }
-    if (GridRole.WDAliases().contains(nodeType)) {
+    if (GridRole.isWebDriver(nodeType)) {
       defaultConfig = "defaults/DefaultNodeWebDriver.json";
     }
 
-   
     res.loadFromJSON(defaultConfig);
 
     // -file *.json ?
@@ -398,7 +391,7 @@ public class RegistrationRequest {
       }
       if (cap.getCapability(SELENIUM_PROTOCOL) == null) {
         cap.setCapability(SELENIUM_PROTOCOL,
-          GridRole.RCAliases().contains(nodeType)
+          GridRole.isRC(nodeType)
             ? SeleniumProtocol.Selenium.toString() : SeleniumProtocol.WebDriver.toString());
       }
     }
@@ -423,7 +416,13 @@ public class RegistrationRequest {
       try {
         URL ur = new URL(u);
         res.configuration.put(HUB_HOST, ur.getHost());
-        res.configuration.put(HUB_PORT, ur.getPort());
+        //If port was not defined after -hub default it to 4444
+        int port = ur.getPort();
+        if(port==-1){
+        	port=4444;
+        	LOG.info("No port was provided in -hub. Defaulting hub port to 4444");
+        }
+        res.configuration.put(HUB_PORT, port);
       } catch (MalformedURLException e) {
         throw new GridConfigurationException("the specified hub is not valid : -hub " + u);
       }
@@ -508,7 +507,7 @@ public class RegistrationRequest {
   }
 
   private DesiredCapabilities addCapabilityFromString(String capability) {
-    log.info("Adding " + capability);
+    LOG.info("Adding " + capability);
     String[] s = capability.split(",");
     if (s.length == 0) {
       throw new GridConfigurationException("-browser must be followed by a browser description");
@@ -543,7 +542,7 @@ public class RegistrationRequest {
 
   /**
    * add config, but overwrite capabilities.
-   * 
+   *
    * @param resource
    */
   public void loadFromJSON(String resource) {
@@ -603,7 +602,7 @@ public class RegistrationRequest {
 
   /**
    * Validate the current setting and throw a config exception is an invalid setup is detected.
-   * 
+   *
    * @throws GridConfigurationException
    */
   public void validate() throws GridConfigurationException {
@@ -615,7 +614,7 @@ public class RegistrationRequest {
           + hub + " -" + HUB_PORT + " " + port);
     }
   }
-  
- 
+
+
 
 }

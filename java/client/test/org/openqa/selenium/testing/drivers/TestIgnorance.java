@@ -1,19 +1,19 @@
-/*
-Copyright 2011 Selenium committers
-Copyright 2011-2015 Software Freedom Conservancy
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 package org.openqa.selenium.testing.drivers;
 
@@ -61,6 +61,7 @@ public class TestIgnorance {
   private Set<String> methods = Sets.newHashSet();
   private Set<String> only = Sets.newHashSet();
   private Set<String> ignoreMethods = Sets.newHashSet();
+  private Set<String> ignoreClasses = Sets.newHashSet();
   private Browser browser;
 
   public TestIgnorance(Browser browser) {
@@ -74,6 +75,11 @@ public class TestIgnorance {
     String method = System.getProperty("method");
     if (method != null) {
       methods.addAll(Arrays.asList(method.split(",")));
+    }
+
+    String ignoreClass = System.getProperty("ignore_class");
+    if (ignoreClass != null) {
+      ignoreClasses.addAll(Arrays.asList(ignoreClass.split(",")));
     }
 
     String skip = System.getProperty("ignore_method");
@@ -157,6 +163,7 @@ public class TestIgnorance {
   private boolean isIgnoredDueToEnvironmentVariables(FrameworkMethod method, Object test) {
     return (!only.isEmpty() && !only.contains(test.getClass().getSimpleName())) ||
            (!methods.isEmpty() && !methods.contains(method.getName())) ||
+           ignoreClasses.contains(test.getClass().getSimpleName()) ||
            ignoreMethods.contains(method.getName());
   }
 

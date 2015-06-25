@@ -1,19 +1,19 @@
-/*
-Copyright 2012 Selenium committers
-Copyright 2012-2015 Software Freedom Conservancy
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 package org.openqa.selenium;
 
@@ -139,7 +139,7 @@ public class ClickScrollingTest extends JUnit4TestBase {
     driver.findElement(By.id("radio")).click();
     // If we don't throw, we're good
   }
-  
+
   @Ignore(value = {IE, MARIONETTE}, reason = "IE has special overflow handling")
   @Test
   public void testShouldScrollOverflowElementsIfClickPointIsOutOfViewButElementIsInView() {
@@ -148,89 +148,71 @@ public class ClickScrollingTest extends JUnit4TestBase {
     assertEquals("clicked", driver.findElement(By.id("clicked")).getText());
   }
 
+  @NoDriverAfterTest // So that next test never starts with "inside a frame" base state.
   @Test
   @Ignore(value = {SAFARI, MARIONETTE}, reason = "others: not tested")
   public void testShouldBeAbleToClickElementInAFrameThatIsOutOfView() {
-    try {
-      driver.get(appServer.whereIs("scrolling_tests/page_with_frame_out_of_view.html"));
-      driver.switchTo().frame("frame");
-      WebElement element = driver.findElement(By.name("checkbox"));
-      element.click();
-      assertTrue(element.isSelected());
-    } finally {
-      driver.switchTo().defaultContent();
-    }
+    driver.get(appServer.whereIs("scrolling_tests/page_with_frame_out_of_view.html"));
+    driver.switchTo().frame("frame");
+    WebElement element = driver.findElement(By.name("checkbox"));
+    element.click();
+    assertTrue(element.isSelected());
   }
-  
+
+  @NoDriverAfterTest // So that next test never starts with "inside a frame" base state.
   @Test
   @Ignore(value = {SAFARI, MARIONETTE}, reason = "not tested")
   public void testShouldBeAbleToClickElementThatIsOutOfViewInAFrame() {
-    try {
-      driver.get(appServer.whereIs("scrolling_tests/page_with_scrolling_frame.html"));
-      driver.switchTo().frame("scrolling_frame");
-      WebElement element = driver.findElement(By.name("scroll_checkbox"));
-      element.click();
-      assertTrue(element.isSelected());
-    } finally {
-      driver.switchTo().defaultContent();
-    }
+    driver.get(appServer.whereIs("scrolling_tests/page_with_scrolling_frame.html"));
+    driver.switchTo().frame("scrolling_frame");
+    WebElement element = driver.findElement(By.name("scroll_checkbox"));
+    element.click();
+    assertTrue(element.isSelected());
   }
-  
+
+  @NoDriverAfterTest // So that next test never starts with "inside a frame" base state.
   @Test(expected = MoveTargetOutOfBoundsException.class)
   @Ignore(reason = "All tested browses scroll non-scrollable frames")
   public void testShouldNotBeAbleToClickElementThatIsOutOfViewInANonScrollableFrame() {
-    try {
-      driver.get(appServer.whereIs("scrolling_tests/page_with_non_scrolling_frame.html"));
-      driver.switchTo().frame("scrolling_frame");
-      WebElement element = driver.findElement(By.name("scroll_checkbox"));
-      element.click();
-    } finally {
-      driver.switchTo().defaultContent();
-    }
+    driver.get(appServer.whereIs("scrolling_tests/page_with_non_scrolling_frame.html"));
+    driver.switchTo().frame("scrolling_frame");
+    WebElement element = driver.findElement(By.name("scroll_checkbox"));
+    element.click();
   }
-  
+
+  @NoDriverAfterTest // So that next test never starts with "inside a frame" base state.
   @Test
   @Ignore(value = {SAFARI, MARIONETTE}, reason = "not tested")
   public void testShouldBeAbleToClickElementThatIsOutOfViewInAFrameThatIsOutOfView() {
-    try {
-      driver.get(appServer.whereIs("scrolling_tests/page_with_scrolling_frame_out_of_view.html"));
-      driver.switchTo().frame("scrolling_frame");
-      WebElement element = driver.findElement(By.name("scroll_checkbox"));
-      element.click();
-      assertTrue(element.isSelected());
-    } finally {
-      driver.switchTo().defaultContent();
-    }
+    driver.get(appServer.whereIs("scrolling_tests/page_with_scrolling_frame_out_of_view.html"));
+    driver.switchTo().frame("scrolling_frame");
+    WebElement element = driver.findElement(By.name("scroll_checkbox"));
+    element.click();
+    assertTrue(element.isSelected());
   }
-  
+
+  @NoDriverAfterTest // So that next test never starts with "inside a frame" base state.
   @Test
   @Ignore(value = {SAFARI, MARIONETTE}, reason = "not tested")
   public void testShouldBeAbleToClickElementThatIsOutOfViewInANestedFrame() {
-    try {
-      driver.get(appServer.whereIs("scrolling_tests/page_with_nested_scrolling_frames.html"));
-      driver.switchTo().frame("scrolling_frame");
-      driver.switchTo().frame("nested_scrolling_frame");
-      WebElement element = driver.findElement(By.name("scroll_checkbox"));
-      element.click();
-      assertTrue(element.isSelected());
-    } finally {
-      driver.switchTo().defaultContent();
-    }
+    driver.get(appServer.whereIs("scrolling_tests/page_with_nested_scrolling_frames.html"));
+    driver.switchTo().frame("scrolling_frame");
+    driver.switchTo().frame("nested_scrolling_frame");
+    WebElement element = driver.findElement(By.name("scroll_checkbox"));
+    element.click();
+    assertTrue(element.isSelected());
   }
-  
+
+  @NoDriverAfterTest // So that next test never starts with "inside a frame" base state.
   @Test
   @Ignore(value = {SAFARI, MARIONETTE}, reason = "not tested")
   public void testShouldBeAbleToClickElementThatIsOutOfViewInANestedFrameThatIsOutOfView() {
-    try {
-      driver.get(appServer.whereIs("scrolling_tests/page_with_nested_scrolling_frames_out_of_view.html"));
-      driver.switchTo().frame("scrolling_frame");
-      driver.switchTo().frame("nested_scrolling_frame");
-      WebElement element = driver.findElement(By.name("scroll_checkbox"));
-      element.click();
-      assertTrue(element.isSelected());
-    } finally {
-      driver.switchTo().defaultContent();
-    }
+    driver.get(appServer.whereIs("scrolling_tests/page_with_nested_scrolling_frames_out_of_view.html"));
+    driver.switchTo().frame("scrolling_frame");
+    driver.switchTo().frame("nested_scrolling_frame");
+    WebElement element = driver.findElement(By.name("scroll_checkbox"));
+    element.click();
+    assertTrue(element.isSelected());
   }
 
   @JavascriptEnabled
@@ -246,18 +228,15 @@ public class ClickScrollingTest extends JUnit4TestBase {
     return (Long)((JavascriptExecutor)driver).executeScript("return document.body.scrollTop;");
   }
 
+  @NoDriverAfterTest // So that next test never starts with "inside a frame" base state.
   @Test
   @Ignore(value = {SAFARI, MARIONETTE}, reason = "Not tested")
   public void testShouldBeAbleToClickElementInATallFrame() {
-    try {
-      driver.get(appServer.whereIs("scrolling_tests/page_with_tall_frame.html"));
-      driver.switchTo().frame("tall_frame");
-      WebElement element = driver.findElement(By.name("checkbox"));
-      element.click();
-      assertTrue(element.isSelected());
-    } finally {
-      driver.switchTo().defaultContent();
-    }
+    driver.get(appServer.whereIs("scrolling_tests/page_with_tall_frame.html"));
+    driver.switchTo().frame("tall_frame");
+    WebElement element = driver.findElement(By.name("checkbox"));
+    element.click();
+    assertTrue(element.isSelected());
   }
 
 }

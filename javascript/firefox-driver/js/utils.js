@@ -1,23 +1,21 @@
-/*
- Copyright 2007-2009 WebDriver committers
- Copyright 2007-2009 Google Inc.
- Portions copyright 2011 Software Freedom Conservancy
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
- http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- */
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 goog.provide('Utils');
-goog.provide('WebDriverError');
 
 goog.require('WebLoadingListener');
 goog.require('bot.ErrorCode');
@@ -32,62 +30,6 @@ goog.require('goog.log');
 goog.require('goog.string');
 goog.require('goog.style');
 
-
-/**
- * A WebDriver error.
- * @param {!number} code The error code.
- * @param {!string|Error} messageOrError The error message, or another Error to
- *     propagate.
- * @param {!Object=} additional Additional fields bearing useful information.
- * @constructor
- */
-WebDriverError = function(code, messageOrError, additional) {
-  var message;
-  var stack;
-  if (messageOrError instanceof Error) {
-    message = messageOrError.message;
-    stack = messageOrError.stack;
-  } else {
-    message = messageOrError.toString();
-    stack = Error(message).stack.split('\n');
-    stack.shift();
-    stack = stack.join('\n');
-  }
-
-  this.additionalFields = [];
-
-  if (!!additional) {
-    for (var field in additional) {
-      this.additionalFields.push(field);
-      this[field] = additional[field];
-    }
-  }
-
-  /**
-   * This error's status code.
-   * @type {!number}
-   */
-  this.code = code;
-
-  /**
-   * This error's message.
-   * @type {string}
-   */
-  this.message = message;
-
-  /**
-   * Captures a stack trace for when this error was thrown.
-   * @type {string}
-   */
-  this.stack = stack;
-
-  /**
-   * Used to identify this class since instanceof will not work across
-   * component boundaries.
-   * @type {!boolean}
-   */
-  this.isWebDriverError = true;
-};
 
 function notifyOfCloseWindow(windowId) {
   windowId = windowId || 0;
@@ -208,9 +150,6 @@ Utils.getNativeComponent = function(componentId, componentInterface) {
     var obj = Components.classes[componentId].createInstance();
     return obj.QueryInterface(componentInterface);
   } catch (e) {
-    goog.log.warning(Utils.LOG_,
-        'Unable to find native component: ' + componentId,
-        e);
     // Unable to retrieve native events. No biggie, because we fall back to
     // synthesis later
     return undefined;
@@ -259,7 +198,7 @@ Utils.useNativeEvents = function() {
   return !!(enableNativeEvents && Utils.getNativeEvents());
 };
 
-Utils.getPageLoadingStrategy = function() {
+Utils.getPageLoadStrategy = function() {
   var prefs =
       fxdriver.moz.getService('@mozilla.org/preferences-service;1', 'nsIPrefBranch');
   return prefs.prefHasUserValue('webdriver.load.strategy') ?

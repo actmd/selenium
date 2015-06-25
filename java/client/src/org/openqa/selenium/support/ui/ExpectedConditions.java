@@ -1,19 +1,19 @@
-/*
-Copyright 2011 Selenium committers
-Copyright 2011 Software Freedom Conservancy.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
- */
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 
 package org.openqa.selenium.support.ui;
@@ -31,6 +31,8 @@ import org.openqa.selenium.WebElement;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Canned {@link ExpectedCondition}s which are generally useful within webdriver
@@ -87,6 +89,79 @@ public class ExpectedConditions {
       @Override
       public String toString() {
         return String.format("title to contain \"%s\". Current title: \"%s\"", title, currentTitle);
+      }
+    };
+  }
+
+  /**
+   * An expectation for the URL of the current page to be a specific url.
+   *
+   * @param url the url that the page should be on
+   * @return <code>true</code> when the URL is what it should be
+   */
+  public static ExpectedCondition<Boolean> urlToBe(final String url) {
+    return new ExpectedCondition<Boolean>() {
+      private String currentUrl = "";
+
+      @Override
+      public Boolean apply(WebDriver driver) {
+        currentUrl = driver.getCurrentUrl();
+        return currentUrl != null && currentUrl.equals(url);
+      }
+
+      @Override
+      public String toString() {
+        return String.format("url to be \"%s\". Current url: \"%s\"", url, currentUrl);
+      }
+    };
+  }
+
+  /**
+   * An expectation for the URL of the current page to contain specific text.
+   *
+   * @param fraction the fraction of the url that the page should be on
+   * @return <code>true</code> when the URL contains the text
+   */
+  public static ExpectedCondition<Boolean> urlContains(final String fraction) {
+    return new ExpectedCondition<Boolean>() {
+      private String currentUrl = "";
+
+      @Override
+      public Boolean apply(WebDriver driver) {
+        currentUrl = driver.getCurrentUrl();
+        return currentUrl != null && currentUrl.contains(fraction);
+      }
+
+      @Override
+      public String toString() {
+        return String.format("url to contain \"%s\". Current url: \"%s\"", fraction, currentUrl);
+      }
+    };
+  }
+
+  /**
+   * Expectation for the URL to match a specific regular expression
+   *
+   * @param regex the regular expression that the URL should match
+   * @return <code>true</code> if the URL matches the specified regular expression
+   */
+  public static ExpectedCondition<Boolean> urlMatches(final String regex) {
+    return new ExpectedCondition<Boolean>() {
+      private String currentUrl;
+      private Pattern pattern;
+      private Matcher matcher;
+
+      @Override
+      public Boolean apply(WebDriver driver) {
+        currentUrl = driver.getCurrentUrl();
+        pattern = Pattern.compile(regex);
+        matcher = pattern.matcher(currentUrl);
+        return matcher.find();
+      }
+
+      @Override
+      public String toString() {
+        return String.format("url to match the regex \"%s\". Current url: \"%s\"", regex, currentUrl);
       }
     };
   }
@@ -440,6 +515,58 @@ public class ExpectedConditions {
       @Override
       public String toString() {
         return "frame to be available: " + locator;
+      }
+    };
+  }
+
+  /**
+   * An expectation for checking whether the given frame is available to switch
+   * to. <p> If the frame is available it switches the given driver to the
+   * specified frameIndex.
+   *
+   * @param frameLocator used to find the frame (index)
+   */
+  public static ExpectedCondition<WebDriver> frameToBeAvailableAndSwitchToIt(
+      final int frameLocator) {
+    return new ExpectedCondition<WebDriver>() {
+      @Override
+      public WebDriver apply(WebDriver driver) {
+        try {
+          return driver.switchTo().frame(frameLocator);
+        } catch (NoSuchFrameException e) {
+          return null;
+        }
+      }
+
+      @Override
+      public String toString() {
+        return "frame to be available: " + frameLocator;
+      }
+    };
+  }
+  
+  /**
+   * An expectation for checking whether the given frame is available to switch
+   * to. <p> If the frame is available it switches the given driver to the
+   * specified webelement.
+   *
+   * @param frameLocator used to find the frame (webelement)
+   */
+  public static ExpectedCondition<WebDriver> frameToBeAvailableAndSwitchToIt(
+      final WebElement frameLocator) {
+    return new ExpectedCondition<WebDriver>() {
+      @Override
+      public WebDriver apply(WebDriver driver) {
+        try {
+          return driver.switchTo().frame(frameLocator);
+        } catch (NoSuchFrameException e) {
+          return null;
+        }
+      }
+
+      @Override
+      public String toString() {
+        return "frame to be available: " + frameLocator;
       }
     };
   }

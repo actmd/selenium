@@ -1,19 +1,19 @@
-/*
-Copyright 2012 Selenium committers
-Copyright 2012 Software Freedom Conservancy
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 
 package org.openqa.selenium.remote;
@@ -21,9 +21,11 @@ package org.openqa.selenium.remote;
 import static org.openqa.selenium.remote.ErrorCodes.SUCCESS;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterables;
+import com.google.common.primitives.Ints;
 
 import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriverException;
@@ -37,7 +39,7 @@ import java.util.Map;
 
 /**
  * Maps exceptions to status codes for sending over the wire.
- * 
+ *
  * @author jmleyba@gmail.com (Jason Leyba)
  */
 public class ErrorHandler {
@@ -94,7 +96,7 @@ public class ErrorHandler {
     if (response.getStatus() == SUCCESS) {
       return response;
     }
-    
+
     if (response.getValue() instanceof Throwable) {
       throw Throwables.propagate((Throwable) response.getValue());
     }
@@ -293,12 +295,20 @@ public class ErrorHandler {
       if (frameInfo == null) {
         return null;
       }
-
-      Number lineNumber = (Number) frameInfo.get(LINE_NUMBER);
-      if (lineNumber == null) {
-        return null;
+      
+      Optional<Number> maybeLineNumberInteger = Optional.absent();
+      
+      final Object lineNumberObject = frameInfo.get(LINE_NUMBER);
+      if (lineNumberObject instanceof Number) {
+    	  maybeLineNumberInteger = Optional.of((Number) lineNumberObject);
+      } else if (lineNumberObject != null) {
+    	  // might be a Number as a String
+    	  maybeLineNumberInteger = Optional.fromNullable((Number) Ints.tryParse(lineNumberObject.toString()));
       }
-
+      
+      // default -1 for unknown, see StackTraceElement constructor javadoc
+      final int lineNumber = maybeLineNumberInteger.or(-1).intValue();
+      
       // Gracefully handle remote servers that don't (or can't) send back
       // complete stack trace info. At least some of this information should
       // be included...
@@ -310,7 +320,7 @@ public class ErrorHandler {
           ? toStringOrNull(frameInfo.get(FILE_NAME)) : UNKNOWN_FILE;
 
       return new StackTraceElement(className, methodName, fileName,
-          lineNumber.intValue());
+          lineNumber);
     }
 
     private static String toStringOrNull(Object o) {

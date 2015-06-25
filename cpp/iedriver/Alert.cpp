@@ -1,5 +1,8 @@
-// Copyright 2012 Software Freedom Conservancy
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -204,6 +207,16 @@ std::string Alert::GetDirectUIDialogText() {
   hr = message_text_object->get_accName(child_id, &text_bstr);
   if (FAILED(hr)) {
     LOGHR(WARN, hr) << "Failed to get accName property from text object";
+    return alert_text_value;
+  } else if (hr != S_OK) {
+    // N.B., get_accName can return an error value without it being a
+    // standard COM error.
+    LOG(WARN) << "Getting accName property from text object returned an error "
+              << "(value: " << hr << "). The text object may not have a name.";
+    return alert_text_value;
+  } else if (text_bstr == NULL) {
+    LOG(WARN) << "Getting accName property from text object returned a null "
+              << "value";
     return alert_text_value;
   }
 

@@ -1,19 +1,19 @@
-/*
-Copyright 2007-2012 Selenium committers
-Portions copyright 2011-2015 Software Freedom Conservancy
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
- */
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 package org.openqa.selenium;
 
@@ -44,7 +44,6 @@ import java.util.List;
 
 public class VisibilityTest extends JUnit4TestBase {
 
-  @JavascriptEnabled
   @Test
   public void testShouldAllowTheUserToTellIfAnElementIsDisplayedOrNot() {
     driver.get(pages.javascriptPage);
@@ -56,7 +55,6 @@ public class VisibilityTest extends JUnit4TestBase {
     assertThat(driver.findElement(By.id("hidden")).isDisplayed(), is(false));
   }
 
-  @JavascriptEnabled
   @Test
   public void testVisibilityShouldTakeIntoAccountParentVisibility() {
     driver.get(pages.javascriptPage);
@@ -68,7 +66,6 @@ public class VisibilityTest extends JUnit4TestBase {
     assertFalse(hiddenLink.isDisplayed());
   }
 
-  @JavascriptEnabled
   @Test
   public void testShouldCountElementsAsVisibleIfStylePropertyHasBeenSet() {
     driver.get(pages.javascriptPage);
@@ -95,7 +92,6 @@ public class VisibilityTest extends JUnit4TestBase {
     assertFalse(element.isDisplayed());
   }
 
-  @JavascriptEnabled
   @Test
   public void testHiddenInputElementsAreNeverVisible() {
     driver.get(pages.javascriptPage);
@@ -105,7 +101,6 @@ public class VisibilityTest extends JUnit4TestBase {
     assertFalse(shown.isDisplayed());
   }
 
-  @JavascriptEnabled
   @Test
   public void testShouldNotBeAbleToClickOnAnElementThatIsNotDisplayed() {
     driver.get(pages.javascriptPage);
@@ -119,7 +114,6 @@ public class VisibilityTest extends JUnit4TestBase {
     }
   }
 
-  @JavascriptEnabled
   @Test
   public void testShouldNotBeAbleToTypeAnElementThatIsNotDisplayed() {
     driver.get(pages.javascriptPage);
@@ -135,7 +129,7 @@ public class VisibilityTest extends JUnit4TestBase {
     assertThat(element.getAttribute("value"), is(not("You don't see me")));
   }
 
-  @JavascriptEnabled
+  @JavascriptEnabled // element.getSize() requires Javascript in HtmlUnit
   @Ignore({IE})
   @Test
   public void testZeroSizedDivIsShownIfDescendantHasSize() {
@@ -289,7 +283,6 @@ public class VisibilityTest extends JUnit4TestBase {
    * @see <a href="http://code.google.com/p/selenium/issues/detail?id=1610">
    *      http://code.google.com/p/selenium/issues/detail?id=1610</a>
    */
-  @JavascriptEnabled
   @Ignore({IE, HTMLUNIT, MARIONETTE})
   @Test
   public void testShouldBeAbleToClickOnElementsWithOpacityZero() {
@@ -302,7 +295,6 @@ public class VisibilityTest extends JUnit4TestBase {
     assertEquals("1", element.getCssValue("opacity"));
   }
 
-  @JavascriptEnabled
   @Ignore({MARIONETTE})
   @Test
   public void testShouldBeAbleToSelectOptionsFromAnInvisibleSelect() {
@@ -322,7 +314,6 @@ public class VisibilityTest extends JUnit4TestBase {
     assertTrue("Oranges should be selected", oranges.isSelected());
   }
 
-  @JavascriptEnabled
   @Test
   public void testCorrectlyDetectMapElementsAreShown() {
     driver.get(pages.mapVisibilityPage);

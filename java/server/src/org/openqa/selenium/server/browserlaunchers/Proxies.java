@@ -1,19 +1,19 @@
-/*
-Copyright 2010 Selenium committers
-Portions copyright 2011 Software Freedom Conservancy
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
- */
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 package org.openqa.selenium.server.browserlaunchers;
 
@@ -21,6 +21,8 @@ import static org.openqa.selenium.remote.CapabilityType.PROXY;
 import static org.openqa.selenium.remote.CapabilityType.ForSeleniumServer.AVOIDING_PROXY;
 import static org.openqa.selenium.remote.CapabilityType.ForSeleniumServer.ONLY_PROXYING_SELENIUM_TRAFFIC;
 import static org.openqa.selenium.remote.CapabilityType.ForSeleniumServer.PROXYING_EVERYTHING;
+
+import com.google.common.base.Preconditions;
 
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Proxy;
@@ -105,7 +107,7 @@ public class Proxies {
 
     Object tempProxy = capabilities.getCapability(CapabilityType.PROXY);
     if (tempProxy != null) {
-      Proxy proxy = Proxy.extractFrom(capabilities);
+      Proxy proxy = Preconditions.checkNotNull(Proxy.extractFrom(capabilities));
       if (proxy.getHttpProxy() != null) {
         pac.defaults().toProxy(proxy.getHttpProxy());
       } else if (proxy.getProxyAutoconfigUrl() != null) {

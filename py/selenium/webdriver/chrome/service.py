@@ -1,20 +1,21 @@
-#!/usr/bin/python
+# Licensed to the Software Freedom Conservancy (SFC) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The SFC licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
 #
-# Copyright 2011 Webdriver_name committers
-# Copyright 2011 Google Inc.
+#   http://www.apache.org/licenses/LICENSE-2.0
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 import os
+import errno
 import subprocess
 from subprocess import PIPE
 import time
@@ -52,8 +53,10 @@ class Service(object):
         Starts the ChromeDriver Service.
 
         :Exceptions:
-         - WebDriverException : Raised either when it can't start the service
-           or when it can't connect to the service
+         - WebDriverException : Raised either when it cannot find the
+           executable, when it does not have permissions for the
+           executable, or when it cannot connect to the service.
+         - Possibly other Exceptions in rare circumstances (OSError, etc).
         """
         env = self.env or os.environ
         try:
@@ -61,13 +64,21 @@ class Service(object):
               self.path,
               "--port=%d" % self.port] +
               self.service_args, env=env, stdout=PIPE, stderr=PIPE)
-        except:
-            raise WebDriverException(
-                "'" + os.path.basename(self.path) + "' executable needs to be \
-                available in the path. Please look at \
-                http://docs.seleniumhq.org/download/#thirdPartyDrivers \
-                and read up at \
-                https://github.com/SeleniumHQ/selenium/wiki/ChromeDriver")
+        except OSError as err:
+            docs_msg = "Please see " \
+                   "https://sites.google.com/a/chromium.org/chromedriver/home"
+            if err.errno == errno.ENOENT:
+                raise WebDriverException(
+                    "'%s' executable needs to be in PATH. %s" % (
+                        os.path.basename(self.path), docs_msg)
+                )
+            elif err.errno == errno.EACCES:
+                raise WebDriverException(
+                    "'%s' executable may have wrong permissions. %s" % (
+                        os.path.basename(self.path), docs_msg)
+                )
+            else:
+                raise
         count = 0
         while not utils.is_connectable(self.port):
             count += 1
@@ -108,6 +119,8 @@ class Service(object):
         #Tell the Server to properly die in case
         try:
             if self.process:
+                self.process.stdout.close()
+                self.process.stderr.close()
                 self.process.kill()
                 self.process.wait()
         except OSError:

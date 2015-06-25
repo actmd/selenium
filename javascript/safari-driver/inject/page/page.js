@@ -1,17 +1,19 @@
-// Copyright 2012 Selenium committers
-// Copyright 2012 Software Freedom Conservancy
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+//   http://www.apache.org/licenses/LICENSE-2.0
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 /**
  * @fileoverview Defines utilities for exchanging messages between the
@@ -61,6 +63,14 @@ safaridriver.inject.page.encoder;
 safaridriver.inject.page.init = function() {
   goog.debug.LogManager.getRoot().setLevel(goog.debug.Logger.Level.INFO);
 
+  // The page script is installed with an empty 'this' object, to avoid
+  // polluting the global namespace. But we still want Closure libraries to be
+  // able to read the properties of window that would normally be in
+  // goog.global, so we copy those into goog.global.
+  if (window != goog.global) {
+    copyWindowPropertiesTo(goog.global);
+  }
+
   var handler = new safaridriver.logging.ForwardingHandler(window);
   handler.captureConsoleOutput();
 
@@ -94,6 +104,17 @@ safaridriver.inject.page.init = function() {
     window[name].toString = function() {
       return oldFn.toString();
     };
+  }
+
+  function copyWindowPropertiesTo(obj) {
+    goog.array.forEach(Object.getOwnPropertyNames(window), function(name) {
+      if (!(name in obj)) {
+        var descriptor = Object.getOwnPropertyDescriptor(window, name);
+        if (descriptor) {
+          Object.defineProperty(obj, name, descriptor);
+        }
+      }
+    });
   }
 };
 goog.exportSymbol('init', safaridriver.inject.page.init);

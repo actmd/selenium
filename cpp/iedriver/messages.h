@@ -1,5 +1,8 @@
-// Copyright 2013 Software Freedom Conservancy
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -34,3 +37,8 @@
 #define WD_ASYNC_SCRIPT_DETACH_LISTENTER WM_APP + 20
 
 #define WD_CHANGE_PROXY WM_APP + 21
+
+#define WD_GET_SCRIPTABLE_COOKIES WM_APP + 22
+#define WD_GET_HTTPONLY_COOKIES WM_APP + 23
+#define WD_GET_COOKIE_CACHE_FILES WM_APP + 24
+#define WD_SET_COOKIE WM_APP + 25

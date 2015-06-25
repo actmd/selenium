@@ -1,21 +1,19 @@
-/*
- Copyright 2007-2009 WebDriver committers
- Copyright 2007-2009 Google Inc.
- Portions copyright 2011 Software Freedom Conservancy
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
- http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- */
-
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 goog.provide('WebElement');
 
@@ -355,35 +353,6 @@ WebElement.isElementDisplayed = function(respond, parameters) {
   respond.send();
 };
 
-
-WebElement.getElementLocation = function(respond, parameters) {
-  var element = Utils.getElementAt(parameters.id,
-                                   respond.session.getDocument());
-  var win = respond.session.getWindow();
-
-  var location = Utils.getLocation(element);
-
-  respond.value = {
-    x: Math.round(location.x + win.pageXOffset),
-    y: Math.round(location.y + win.pageYOffset)
-  };
-
-  respond.send();
-};
-
-
-WebElement.getElementSize = function(respond, parameters) {
-  var element = Utils.getElementAt(parameters.id,
-                                   respond.session.getDocument());
-
-  var box = Utils.getLocation(element);
-
-  respond.value = {
-    width: Math.round(box.width),
-    height: Math.round(box.height)
-  };
-  respond.send();
-};
 
 WebElement.getElementRect = function(respond, parameters) {
   var element = Utils.getElementAt(parameters.id,

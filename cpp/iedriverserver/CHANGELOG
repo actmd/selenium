@@ -9,6 +9,96 @@ available via the project downloads page. Changes in "revision" field indicate
 private releases checked into the prebuilts directory of the source tree, but
 not made generally available on the downloads page.
 
+v2.46.0.3
+=========
+ * Fixed IE cookie handling for down-level operating systems.
+
+v2.46.0.2
+=========
+ * Updates to JavaScript automation atoms.
+ * Refactoring Windows Hooks. Windows hooks are now wrapped in a single class,
+   eliminating a fair amount of duplicate code.
+ * Rewrote cookie handling for IE. The IE driver should now be able to return
+   full information for most cookies, including expiration date and secure
+   status. Additionally, the driver will now return HTTP-only cookies from
+   IE. Note that some specific cookie information will still be incomplete.
+   In particular, session cookies that may have been set with domain, path,
+   or secure tokens in the cookie string will not have those tokens set in
+   the returned cookie, as that information is not available via any API.
+   Also note that this change introduces additional use of Windows APIs that
+   are not supported when run from a service process, making that more
+   completely unsupported. Fixes issue #391.
+
+v2.46.0.1
+=========
+ * Handles issue with alert text controls conatining no accText property in IE.
+   Fixes issue #651.
+
+v2.46.0.0
+=========
+ * Release to synchronize with release of Selenium project.
+ * Updates to JavaScript automation atoms.
+
+v2.45.0.6
+=========
+ * Updates to JavaScript automation atoms.
+ * Allow IE driver to work with transparent file upload elements. Many modern
+   JavaScript widget frameworks hide <input type="file"> elements so as to
+   make their UIs "prettier." The IE driver would see these elements as not
+   visible, and thus not interactible. This commit allows users to use sendKeys
+   to upload files when this type of file upload element exists, bringing the
+   driver in line with what is allowed by the Firefox driver.
+
+v2.45.0.5
+=========
+ * Changed to allow interaction with elements where opacity = 0. The
+   isDisplayed will still return false for those elements, as is consistent
+   with drivers for Firefox and Chrome. Fixes issue #503.
+
+v2.45.0.4
+=========
+ * Added busy check after attaching to newly launched IE instance.
+ * Corrected logic in 'eager' page loading strategy for IE.
+
+v2.45.0.3
+=========
+ * Updates to JavaScript automation atoms.
+ * Corrected wrong value for pageLoadStrategy capability.
+ * Reset browser window handle on failure to attach via Active Accessibility.
+   When launching a new instance, if the driver attempts to use Active
+   Accessibility to attach to the instance, and the attach fails, the driver
+   should attempt to attach using the ShellWindows API. However, this fallback
+   is skipped if the window has already been found. Resetting the found window
+   handle to NULL allows the driver to proceed with the second attempt.
+
+v2.45.0.2
+=========
+ * Updates to JavaScript automation atoms.
+ * Added pageLoadStrategy to IE driver. Setting a capability named 
+   pageLoadStrategy when creating a session with the IE driver will now change
+   the wait behavior when navigating to a new page. The valid values are:
+
+     "normal" - Waits for document.readyState to be 'complete'. This is the
+                default, and is the same behavior as all previous versions of
+                the IE driver.
+     "eager"  - Will abort the wait when document.readyState is
+                'interactive' instead of waiting for 'complete'.
+     "none"   - Will abort the wait immediately, without waiting for any of
+                the page to load.
+
+   Setting the capability to an invalid value will result in use of the
+   "normal" page load strategy.
+ * Added delay and logging on attaching to launched IE. There are times when
+   the two methods used for attaching to a launched instance of Internet
+   Explorer will fail. This commit adds additional logging to help make
+   diagnosing the exact failure points of these circumstances easier.
+
+v2.45.0.1
+=========
+ * Updates to JavaScript automation atoms.
+ * Changed to prevent crash when driver fails to connect to IWebBrowser2
+   object.
+
 v2.45.0.0
 =========
  * Release to synchronize with release of Selenium project.

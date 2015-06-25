@@ -45,8 +45,6 @@ java_library(name = 'helpers',
     'Pages.java',
     'ParallelTestRunner.java',
     'StubDriver.java',
-    'StubElement.java',
-    'StubRenderedWebElement.java',
     'WaitingConditions.java',
   ],
   deps = [

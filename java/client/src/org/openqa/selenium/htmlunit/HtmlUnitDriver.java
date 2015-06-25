@@ -1,19 +1,19 @@
-/*
-Copyright 2007-2009 Selenium committers
-Portions copyright 2011 Software Freedom Conservancy
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
- */
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 package org.openqa.selenium.htmlunit;
 
@@ -121,6 +121,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+/**
+ * An implementation of {@link WebDriver} that drives <a href="http://htmlunit.sourceforge.net/">HtmlUnit</a>,
+ * which is a headless (GUI-less) browser simulator.
+ * <p>The main supported browsers are Chrome, Firefox and Internet Explorer. 
+ */
 public class HtmlUnitDriver implements WebDriver, JavascriptExecutor,
     FindsById, FindsByLinkText, FindsByXPath, FindsByName, FindsByCssSelector,
     FindsByTagName, FindsByClassName, HasCapabilities, HasInputDevices {
@@ -144,6 +149,11 @@ public class HtmlUnitDriver implements WebDriver, JavascriptExecutor,
   public static final String INVALIDSELECTIONERROR =
       "The xpath expression '%s' selected an object of type '%s' instead of a WebElement";
 
+  /**
+   * Constructs a new instance with the specified {@link BrowserVersion}.
+   *
+   * @param version the browser version to use
+   */
   public HtmlUnitDriver(BrowserVersion version) {
     webClient = createWebClient(version);
     currentWindow = webClient.getCurrentWindow();
@@ -187,22 +197,35 @@ public class HtmlUnitDriver implements WebDriver, JavascriptExecutor,
     resetKeyboardAndMouseState();
   }
 
+  /**
+   * Constructs a new instance with JavaScript disabled,
+   * and the {@link BrowserVersion#getDefault() default} BrowserVersion.
+   */
   public HtmlUnitDriver() {
     this(false);
   }
 
+  /**
+   * Constructs a new instance, specify JavaScript support
+   * and using the {@link BrowserVersion#getDefault() default} BrowserVersion.
+   *
+   * @param enableJavascript whether to enable JavaScript support or not
+   */
   public HtmlUnitDriver(boolean enableJavascript) {
     this(BrowserVersion.getDefault());
     setJavascriptEnabled(enableJavascript);
   }
 
   /**
-   * Note: There are two configuration modes for the HtmlUnitDriver using this constructor. The
-   * first is where the browserName is "firefox", "internet explorer" and browserVersion denotes the
-   * desired version. The second one is where the browserName is "htmlunit" and the browserVersion
-   * denotes the required browser AND its version. In this mode the browserVersion could either be
-   * "firefox" for Firefox or "internet explorer-7" for IE 7. The Remote WebDriver uses the second
-   * mode - the first mode is deprecated and should not be used.
+   * Note: There are two configuration modes for the HtmlUnitDriver using this constructor.
+   * <ol>
+   *   <li>The first is where the browserName is "chrome", "firefox" or "internet explorer"
+   *       and browserVersion denotes the desired version.</li>
+   *   <li>The second one is where the browserName is "htmlunit" and the browserVersion
+   *       denotes the required browser AND its version. In this mode the browserVersion could be
+   *       "chrome" for Chrome, "firefox-38" for Firefox 38 or "internet explorer-11" for IE 11.</li>
+   * </ol>
+   * <p>The Remote WebDriver uses the second mode - the first mode is deprecated and should not be used.
    */
   public HtmlUnitDriver(Capabilities capabilities) {
     this(determineBrowserVersion(capabilities));
@@ -239,13 +262,13 @@ public class HtmlUnitDriver implements WebDriver, JavascriptExecutor,
       try {
         int version = Integer.parseInt(browserVersion);
         switch (version) {
-          case 17:
-            return BrowserVersion.FIREFOX_17;
+          case 31:
+            return BrowserVersion.FIREFOX_31;
           default:
-            return BrowserVersion.FIREFOX_24;
+            return BrowserVersion.FIREFOX_38;
         }
       } catch (NumberFormatException e) {
-        return BrowserVersion.FIREFOX_24;
+        return BrowserVersion.FIREFOX_38;
       }
     }
 
@@ -260,8 +283,6 @@ public class HtmlUnitDriver implements WebDriver, JavascriptExecutor,
         switch (version) {
           case 8:
             return BrowserVersion.INTERNET_EXPLORER_8;
-          case 9:
-            return BrowserVersion.INTERNET_EXPLORER_9;
           default:
             return BrowserVersion.INTERNET_EXPLORER_11;
         }
@@ -294,8 +315,8 @@ public class HtmlUnitDriver implements WebDriver, JavascriptExecutor,
   }
 
   /**
-   * Create the underlying webclient, but don't set any fields on it.
-   * 
+   * Create the underlying WebClient, but don't set any fields on it.
+   *
    * @param version Which browser to emulate
    * @return a new instance of WebClient.
    */
@@ -304,9 +325,9 @@ public class HtmlUnitDriver implements WebDriver, JavascriptExecutor,
   }
 
   /**
-   * Child classes can override this method to customise the webclient that the HtmlUnit driver
+   * Child classes can override this method to customize the WebClient that the HtmlUnit driver
    * uses.
-   * 
+   *
    * @param client The client to modify
    * @return The modified client
    */
@@ -483,7 +504,7 @@ public class HtmlUnitDriver implements WebDriver, JavascriptExecutor,
   /**
    * Allows HtmlUnit's about:blank to be loaded in the constructor, and may be useful for other
    * tests?
-   * 
+   *
    * @param fullUrl The URL to visit
    */
   protected void get(URL fullUrl) {
@@ -590,7 +611,7 @@ public class HtmlUnitDriver implements WebDriver, JavascriptExecutor,
   @Override
   public void quit() {
     if (webClient != null) {
-      webClient.closeAllWindows();
+      webClient.close();
       webClient = null;
     }
     currentWindow = null;
@@ -648,7 +669,7 @@ public class HtmlUnitDriver implements WebDriver, JavascriptExecutor,
 
     return parseNativeJavascriptResult(result);
   }
-  
+
   private Object[] convertScriptArgs(HtmlPage page, final Object[] args) {
     final Scriptable scope = (Scriptable) page.getEnclosingWindow().getScriptObject();
 
@@ -689,7 +710,7 @@ public class HtmlUnitDriver implements WebDriver, JavascriptExecutor,
     while (arg instanceof WrapsElement) {
       arg = ((WrapsElement) arg).getWrappedElement();
     }
-    
+
     if (!(arg instanceof HtmlUnitWebElement ||
         arg instanceof HtmlElement || // special case the underlying type
         arg instanceof Number ||
@@ -815,7 +836,7 @@ public class HtmlUnitDriver implements WebDriver, JavascriptExecutor,
       }
       return map;
     }
-    
+
     if (value instanceof Location) {
       return convertLocationToMap((Location) value);
     }
@@ -1480,7 +1501,13 @@ public class HtmlUnitDriver implements WebDriver, JavascriptExecutor,
 
     @Override
     public void deleteAllCookies() {
-      getWebClient().getCookieManager().clearCookies();
+      CookieManager cookieManager = getWebClient().getCookieManager();
+
+      URL url = getRawUrl();
+      Set<com.gargoylesoftware.htmlunit.util.Cookie> rawCookies = getWebClient().getCookies(url);
+      for (com.gargoylesoftware.htmlunit.util.Cookie cookie : rawCookies) {
+          cookieManager.removeCookie(cookie);
+      }
     }
 
     @Override

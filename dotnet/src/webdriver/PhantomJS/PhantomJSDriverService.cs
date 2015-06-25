@@ -1,9 +1,9 @@
 ﻿// <copyright file="PhantomJSDriverService.cs" company="WebDriver Committers">
-// Copyright 2007-2012 WebDriver committers
-// Copyright 2007-2012 Google Inc.
-// Portions copyright 2012 Software Freedom Conservancy
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -158,6 +158,13 @@ namespace OpenQA.Selenium.PhantomJS
         public string ProxyType { get; set; }
 
         /// <summary>
+        /// Gets or sets the proxy authentication info (e.g. username:password).
+        /// </summary>
+        [JsonProperty("proxyAuth", NullValueHandling = NullValueHandling.Ignore)]
+        [CommandLineArgumentName("proxy-auth")]
+        public string ProxyAuthentication { get; set; }
+
+        /// <summary>
         /// Gets or sets the encoding used for the starting script (default is "utf8").
         /// </summary>
         [JsonProperty("scriptEncoding", NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.Ignore)]
@@ -172,6 +179,13 @@ namespace OpenQA.Selenium.PhantomJS
         [DefaultValue("SSLv3")]
         [CommandLineArgumentName("ssl-protocol")]
         public string SslProtocol { get; set; }
+
+        /// <summary>
+        /// Gets or sets the location for custom CA certificates (if none set, uses system default).
+        /// </summary>
+        [JsonProperty("sslCertificatesPath", NullValueHandling = NullValueHandling.Ignore)]
+        [CommandLineArgumentName("ssl-certificates-path")]
+        public string SslCertificatesPath { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether web security is enabled and forbids cross-domain XHR (default is yes).

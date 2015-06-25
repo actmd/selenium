@@ -39,6 +39,7 @@ require 'rake-tasks/selenium'
 require 'rake-tasks/se-ide'
 require 'rake-tasks/ie_code_generator'
 require 'rake-tasks/ci'
+require 'rake-tasks/copyright'
 
 require 'rake-tasks/gecko_sdks'
 
@@ -49,7 +50,7 @@ end
 verbose($DEBUG)
 
 def version
-  "2.45.0"
+  "2.46.0"
 end
 ide_version = "2.8.0"
 
@@ -99,9 +100,27 @@ crazy_fun.create_tasks(Dir["**/build.desc"])
 # build can also be done here. For example, here we set the default task
 task :default => [:test]
 
-
-task :all => [:'selenium-java']
+task :all => [
+  :"selenium-java",
+  "//java/client/test/org/openqa/selenium/environment/webserver:webserver:uber"
+]
 task :all_zip => [:'selenium-java_zip']
+task :tests => [
+  "//java/client/test/org/openqa/selenium/htmlunit:test_basic",
+  "//java/client/test/org/openqa/selenium/htmlunit:test_js",
+  "//java/client/test/org/openqa/selenium/firefox:test_synthesized",
+  "//java/client/test/org/openqa/selenium/firefox:test_native",
+  "//java/client/test/org/openqa/selenium/ie:test",
+  "//java/client/test/org/openqa/selenium/chrome:test",
+  "//java/client/test/org/openqa/selenium/opera:test_blink",
+  "//java/client/test/org/openqa/selenium/lift:test",
+  "//java/client/test/org/openqa/selenium/support:SmallTests",
+  "//java/client/test/org/openqa/selenium/support:LargeTests",
+  "//java/client/test/org/openqa/selenium/remote:common-tests",
+  "//java/client/test/org/openqa/selenium/remote:client-tests",
+  "//java/server/test/org/openqa/selenium/remote/server/log:test",
+  "//java/server/test/org/openqa/selenium/remote/server:small-tests",
+]
 task :chrome => [ "//java/client/src/org/openqa/selenium/chrome" ]
 task :common_core => [ "//common:core" ]
 task :grid => [ "//java/server/src/org/openqa/grid/selenium" ]
@@ -154,14 +173,13 @@ task :test_grid => [
 task :test_ie => [ "//java/client/test/org/openqa/selenium/ie:test:run" ]
 task :test_jobbie => [ :test_ie ]
 task :test_firefox => [ "//java/client/test/org/openqa/selenium/firefox:test_synthesized:run" ]
-if (!mac?)
-  task :test_firefox => [ "//java/client/test/org/openqa/selenium/firefox:test_native:run" ]
-end
+task :test_firefox_native => [ "//java/client/test/org/openqa/selenium/firefox:test_native:run" ]
 task :test_opera => [ "//java/client/test/org/openqa/selenium/opera:test_blink:run" ]
-task :test_remote_server => [ '//java/server/test/org/openqa/selenium/remote/server:test:run' ]
+task :test_remote_server => [ '//java/server/test/org/openqa/selenium/remote/server:small-tests:run' ]
 task :test_remote => [
   '//java/client/test/org/openqa/selenium/remote:common-tests:run',
   '//java/client/test/org/openqa/selenium/remote:client-tests:run',
+  '//java/client/test/org/openqa/selenium/remote:remote-driver-tests:run',
   :test_remote_server
 ]
 task :test_safari => [ "//java/client/test/org/openqa/selenium/safari:test:run" ]
@@ -212,7 +230,6 @@ if (opera?)
   task :test_java_webdriver => [:test_opera]
 end
 
-
 task :test_java => [
   "//java/client/test/org/openqa/selenium/atoms:test:run",
   "//java/client/test/org/openqa/selenium:SmallTests:run",
@@ -248,8 +265,7 @@ if (python?)
   task :test => [ :test_py ]
 end
 
-
-task :build => [:all, :remote, :selenium]
+task :build => [:all, :remote, :selenium, :tests]
 
 desc 'Clean build artifacts.'
 task :clean do
@@ -323,7 +339,7 @@ GeckoSDKs.new do |sdks|
   sdks.add 'third_party/gecko-34/win32',
            'http://ftp.mozilla.org/pub/mozilla.org/xulrunner/releases/34.0/sdk/xulrunner-34.0.en-US.win32.sdk.zip',
            '7a613e5e9503e54205dd16de5c1e9aea'
-  
+
 end
 
 task :'selenium-server_zip' do
@@ -368,49 +384,21 @@ task :javadocs => [:common, :firefox, :htmlunit, :ie, :remote, :support, :chrome
    sh cmd
 end
 
-task :py_prep_for_install_release => ["//javascript/firefox-driver:webdriver", :chrome, "//javascript/firefox-driver:webdriver_prefs"] do
-    if python? then
-
-        firefox_py_home = "py/selenium/webdriver/firefox/"
-        firefox_build_dir = 'build/javascript/firefox-driver/'
-        x86 = firefox_py_home + "x86/"
-        amd64 = firefox_py_home + "amd64/"
-
-        if (windows?) then
-            firefox_build_dir = firefox_build_dir.gsub(/\//, "\\")
-            firefox_py_home = firefox_py_home .gsub(/\//, "\\")
-            x86 = x86.gsub(/\//,"\\")
-            amd64 = amd64.gsub(/\//,"\\")
-        end
-
-        mkdir_p x86 unless File.exists?(x86)
-        mkdir_p amd64 unless File.exists?(amd64)
-
-        cp "cpp/prebuilt/i386/libnoblur.so", x86+"x_ignore_nofocus.so", :verbose => true
-        cp "cpp/prebuilt/amd64/libnoblur64.so", amd64+"x_ignore_nofocus.so", :verbose => true
-
-        cp firefox_build_dir + "webdriver.xpi" , firefox_py_home, :verbose => true
-        cp firefox_build_dir + "webdriver_prefs.json" , firefox_py_home, :verbose => true
-    end
-end
+task :py_prep_for_install_release => [
+  "//javascript/firefox-driver:webdriver",
+  :chrome,
+  "//javascript/firefox-driver:webdriver_prefs",
+  "//py:prep"
+]
 
 task :py_docs => "//py:docs"
 
-task :py_install => :py_prep_for_install_release do
-    sh "python setup.py install"
-end
+task :py_install =>  "//py:install"
 
 task :py_release => :py_prep_for_install_release do
     sh "grep -v test setup.py > setup_release.py; mv setup_release.py setup.py"
     sh "python setup.py sdist upload"
     sh "git checkout setup.py"
-end
-
-
-task :test_selenium_py => [:'selenium-core', :'selenium-server-standalone'] do
-    if python? then
-        sh "python2.6 selenium/test/py/runtests.py", :verbose => true
-    end
 end
 
 file "cpp/iedriver/sizzle.h" => [ "//third_party/js/sizzle:sizzle:header" ] do
@@ -588,7 +576,8 @@ namespace :node do
 
     cmd =  "node javascript/node/deploy.js" <<
         " --output=build/javascript/node/selenium-webdriver" <<
-        " --resource=COPYING:/COPYING" <<
+        " --resource=LICENSE:/LICENSE" <<
+        " --resource=NOTICE:/NOTICE" <<
         " --resource=javascript/firefox-driver/webdriver.json:firefox/webdriver.json" <<
         " --resource=build/cpp/amd64/libnoblur64.so:firefox/amd64/libnoblur64.so" <<
         " --resource=build/cpp/i386/libnoblur.so:firefox/i386/libnoblur.so" <<
@@ -696,6 +685,40 @@ end
 task :authors do
   puts "Generating AUTHORS file"
   sh "(git log --use-mailmap --format='%aN <%aE>' ; cat .OLD_AUTHORS) | sort -uf > AUTHORS"
+end
+
+namespace :copyright do
+  task :update do
+    Copyright.Update(
+        FileList["javascript/**/*.js"].exclude(
+            "javascript/atoms/test/jquery.min.js",
+            "javascript/firefox-driver/extension/components/httpd.js",
+            "javascript/jsunit/**/*.js",
+            "javascript/node/selenium-webdriver/node_modules/**/*.js",
+            "javascript/selenium-core/lib/**/*.js",
+            "javascript/selenium-core/scripts/ui-element.js",
+            "javascript/selenium-core/scripts/ui-map-sample.js",
+            "javascript/selenium-core/scripts/user-extensions.js",
+            "javascript/selenium-core/scripts/xmlextras.js",
+            "javascript/selenium-core/xpath/**/*.js"))
+    Copyright.Update(
+        FileList["py/**/*.py"],
+        :style => "#")
+    Copyright.Update(
+      FileList["rb/**/*.rb"].exclude(
+          "rb/spec/integration/selenium/client/api/screenshot_spec.rb"),
+      :style => "#",
+      :prefix => "# encoding: utf-8\n#\n")
+    Copyright.Update(
+        FileList["java/**/*.java"].exclude(
+            "java/client/src/org/openqa/selenium/internal/Base64Encoder.java",
+            "java/client/test/org/openqa/selenium/internal/Base64EncoderTest.java",
+            "java/server/src/cybervillains/**/*.java",
+            "java/server/src/org/openqa/selenium/server/FrameGroupCommandQueueSet.java",
+            "java/server/src/org/openqa/selenium/server/FutureFileResource.java",
+            "java/server/src/org/openqa/selenium/server/ProxyHandler.java"
+            ))
+  end
 end
 
 at_exit do

@@ -1,9 +1,9 @@
 // <copyright file="GlobalSuppressions.cs" company="WebDriver Committers">
-// Copyright 2007-2011 WebDriver committers
-// Copyright 2007-2011 Google Inc.
-// Portions copyright 2011 Software Freedom Conservancy
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -74,3 +74,5 @@
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "IJavaScriptExecutor", Scope = "member", Target = "OpenQA.Selenium.Support.Extensions.WebDriverExtensions.#ExecuteJavaScript`1(OpenQA.Selenium.IWebDriver,System.String,System.Object[])", Justification = "Interface name is correct")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "IHasCapabilities", Scope = "member", Target = "OpenQA.Selenium.Support.Extensions.WebDriverExtensions.#TakeScreenshot(OpenQA.Selenium.IWebDriver)", Justification = "Interface name is correct")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "ITakesScreenshot", Scope = "member", Target = "OpenQA.Selenium.Support.Extensions.WebDriverExtensions.#TakeScreenshot(OpenQA.Selenium.IWebDriver)", Justification = "Interface name is correct")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Scope = "member", Target = "OpenQA.Selenium.Support.PageObjects.PageFactory.#InitElements`1(OpenQA.Selenium.IWebDriver)", Justification = "Page Object pattern enforces IWebDriver in constructor for generic InitElements call.")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Scope = "member", Target = "OpenQA.Selenium.Support.PageObjects.PageFactory.#InitElements`1(OpenQA.Selenium.IWebDriver,OpenQA.Selenium.Support.PageObjects.IElementLocatorFactory)", Justification = "Page Object pattern enforces IWebDriver in constructor for generic InitElements call.")]

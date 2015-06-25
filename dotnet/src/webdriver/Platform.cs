@@ -1,9 +1,9 @@
 ﻿// <copyright file="Platform.cs" company="WebDriver Committers">
-// Copyright 2007-2011 WebDriver committers
-// Copyright 2007-2011 Google Inc.
-// Portions copyright 2011 Software Freedom Conservancy
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -203,6 +203,15 @@ namespace OpenQA.Selenium
             }
 
             return platformIsType;
+        }
+
+        /// <summary>
+        /// Returns the string value for this platform type.
+        /// </summary>
+        /// <returns>The string value for this platform type.</returns>
+        public override string ToString()
+        {
+            return this.platformTypeValue.ToString();
         }
     }
 }

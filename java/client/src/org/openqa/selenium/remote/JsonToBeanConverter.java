@@ -1,18 +1,19 @@
-/*
-Copyright 2007-2009 Selenium committers
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
- */
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 package org.openqa.selenium.remote;
 
@@ -36,22 +37,22 @@ import java.util.Map;
 
 public class JsonToBeanConverter {
 
-  public <T> T convert(Class<T> clazz, Object text) throws JsonException {
+  public <T> T convert(Class<T> clazz, Object source) throws JsonException {
     try {
-      return convert(clazz, text, 0);
+      return convert(clazz, source, 0);
     } catch (JsonSyntaxException e) {
-      throw new JsonException(e, text);
+      throw new JsonException(e, source);
     }
   }
 
   @SuppressWarnings("unchecked")
-  private <T> T convert(Class<T> clazz, Object text, int depth) {
-    if (text == null) {
+  private <T> T convert(Class<T> clazz, Object source, int depth) {
+    if (source == null) {
       return null;
     }
 
-    if (text instanceof JsonElement) {
-      JsonElement json = (JsonElement) text;
+    if (source instanceof JsonElement) {
+      JsonElement json = (JsonElement) source;
 
       if (json.isJsonPrimitive()) {
         JsonPrimitive jp = json.getAsJsonPrimitive();
@@ -76,20 +77,20 @@ public class JsonToBeanConverter {
       }
     }
 
-    if (isPrimitive(text.getClass())) {
-      return (T) text;
+    if (isPrimitive(source.getClass())) {
+      return (T) source;
     }
 
-    if (isEnum(clazz, text)) {
-      return (T) convertEnum(clazz, text);
+    if (isEnum(clazz, source)) {
+      return (T) convertEnum(clazz, source);
     }
 
-    if ("".equals(String.valueOf(text))) {
-      return (T) text;
+    if ("".equals(String.valueOf(source))) {
+      return (T) source;
     }
 
     if (Command.class.equals(clazz)) {
-      JsonObject json = new JsonParser().parse((String) text).getAsJsonObject();
+      JsonObject json = new JsonParser().parse((String) source).getAsJsonObject();
 
       SessionId sessionId = null;
       if (json.has("sessionId") && !json.get("sessionId").isJsonNull()) {
@@ -105,10 +106,42 @@ public class JsonToBeanConverter {
       return (T) new Command(sessionId, name);
     }
 
+    if (Response.class.equals(clazz)) {
+      Response response = new Response();
+      JsonObject json = source instanceof JsonObject
+                        ? (JsonObject) source
+                        : new JsonParser().parse((String) source).getAsJsonObject();
+
+      if (json.has("state") && ! json.get("state").isJsonNull()) {
+        String state = json.get("state").getAsString();
+        response.setState(state);
+        response.setStatus(ErrorCodes.toStatus(state));
+      }
+      if (json.has("status") && ! json.get("status").isJsonNull()) {
+        JsonElement status = json.get("status");
+        if (status.getAsJsonPrimitive().isString()) {
+          String state = status.getAsString();
+          response.setState(state);
+          response.setStatus(ErrorCodes.toStatus(state));
+        } else {
+          int intStatus = status.getAsInt();
+          response.setState(ErrorCodes.toState(intStatus));
+          response.setStatus(intStatus);
+        }
+      }
+      if (json.has("sessionId") && ! json.get("sessionId").isJsonNull()) {
+        response.setSessionId(json.get("sessionId").getAsString());
+      }
+
+      response.setValue(convert(Object.class, json.get("value")));
+
+      return (T) response;
+    }
+
     if (SessionId.class.equals(clazz)) {
       // Stupid heuristic to tell if we are dealing with a selenium 2 or 3 session id.
-      JsonElement json = text instanceof String
-          ? new JsonParser().parse((String) text).getAsJsonObject() : (JsonElement) text;
+      JsonElement json = source instanceof String
+          ? new JsonParser().parse((String) source).getAsJsonObject() : (JsonElement) source;
       if (json.isJsonPrimitive()) {
         return (T) new SessionId(json.getAsString());
       } else {
@@ -117,25 +150,25 @@ public class JsonToBeanConverter {
     }
 
     if (Capabilities.class.isAssignableFrom(clazz)) {
-      JsonObject json = text instanceof JsonElement
-                        ? ((JsonElement) text).getAsJsonObject()
-                        : new JsonParser().parse(text.toString()).getAsJsonObject();
+      JsonObject json = source instanceof JsonElement
+                        ? ((JsonElement) source).getAsJsonObject()
+                        : new JsonParser().parse(source.toString()).getAsJsonObject();
       Map<String, Object> map = convertMap(json.getAsJsonObject(), depth);
       return (T) new DesiredCapabilities(map);
     }
 
     if (Date.class.equals(clazz)) {
-      return (T) new Date(Long.valueOf(String.valueOf(text)));
+      return (T) new Date(Long.valueOf(String.valueOf(source)));
     }
 
-    if (text instanceof String && !((String) text).startsWith("{") && Object.class.equals(clazz)) {
-      return (T) text;
+    if (source instanceof String && !((String) source).startsWith("{") && Object.class.equals(clazz)) {
+      return (T) source;
     }
 
     Method fromJson = getMethod(clazz, "fromJson");
     if (fromJson != null) {
       try {
-        return (T) fromJson.invoke(null, text.toString());
+        return (T) fromJson.invoke(null, source.toString());
       } catch (IllegalArgumentException e) {
         throw new WebDriverException(e);
       } catch (IllegalAccessException e) {
@@ -146,13 +179,13 @@ public class JsonToBeanConverter {
     }
 
     if (depth == 0) {
-      if (text instanceof String) {
-        text = new JsonParser().parse((String) text);
+      if (source instanceof String) {
+        source = new JsonParser().parse((String) source);
       }
     }
 
-    if (text instanceof JsonElement) {
-      JsonElement element = (JsonElement) text;
+    if (source instanceof JsonElement) {
+      JsonElement element = (JsonElement) source;
 
       if (element.isJsonPrimitive()) {
         return (T) convertJsonPrimitive(element.getAsJsonPrimitive());
@@ -179,7 +212,7 @@ public class JsonToBeanConverter {
       }
     }
 
-    return (T) text; // Crap shoot here; probably a string.
+    return (T) source; // Crap shoot here; probably a string.
   }
 
   private Method getMethod(Class<?> clazz, String methodName) {

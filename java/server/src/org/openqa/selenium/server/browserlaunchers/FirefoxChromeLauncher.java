@@ -1,19 +1,19 @@
-/*
- * Copyright 2011 Software Freedom Conservancy.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
- */
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 package org.openqa.selenium.server.browserlaunchers;
 
 
@@ -70,7 +70,7 @@ public class FirefoxChromeLauncher extends AbstractBrowserLauncher {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * org.openqa.selenium.server.browserlaunchers.AbstractBrowserLauncher#launch(java.lang.String)
    */
@@ -83,7 +83,6 @@ public class FirefoxChromeLauncher extends AbstractBrowserLauncher {
     try {
       homePage = new ChromeUrlConvert().convert(url);
       profilePath = makeCustomProfile(homePage);
-      populateCustomProfileDirectory(profilePath);
 
       log.info("Launching Firefox...");
       process = prepareCommand(
@@ -95,28 +94,6 @@ public class FirefoxChromeLauncher extends AbstractBrowserLauncher {
       process.executeAsync();
     } catch (IOException e) {
       throw new RuntimeException(e);
-    }
-  }
-
-  private void populateCustomProfileDirectory(String profilePath) {
-    /*
-     * The first time we launch Firefox with an empty profile directory, Firefox will launch itself,
-     * populate the profile directory, then kill/relaunch itself, so our process handle goes out of
-     * date. So, the first time we launch Firefox, we'll start it up at an URL that will immediately
-     * shut itself down.
-     */
-    CommandLine command = prepareCommand(browserInstallation.launcherFilePath(),
-        "-profile", profilePath,
-        "-silent"
-        );
-    command.setDynamicLibraryPath(browserInstallation.libraryPath());
-    log.info("Preparing Firefox profile...");
-    command.execute();
-    try {
-      waitForFullProfileToBeCreated(20 * 1000);
-    } catch (RuntimeException e) {
-      command.destroy();
-      throw e;
     }
   }
 
@@ -286,7 +263,7 @@ public class FirefoxChromeLauncher extends AbstractBrowserLauncher {
   /**
    * Wait for one of the Firefox-generated files to come into existence, then wait for Firefox to
    * exit
-   * 
+   *
    * @param timeout the maximum amount of time to wait for the profile to be created
    */
   private void waitForFullProfileToBeCreated(long timeout) {

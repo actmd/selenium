@@ -221,7 +221,7 @@ function Editor(window) {
   //Samit: Enh: display a webpage on the first start (and also on locale change if the version string is localised)
   var versionString = Editor.getString('selenium-ide.version');
   if (!this.app.options.currentVersion || this.app.options.currentVersion != versionString) {
-    openTabOrWindow('https://github.com/SeleniumHQ/selenium/wiki/SeIDEReleaseNotes');
+    openTabOrWindow('https://github.com/SeleniumHQ/selenium/wiki/SeIDE-Release-Notes');
     Preferences.setAndSave(this.app.options, 'currentVersion', versionString);
   }
 
@@ -423,6 +423,7 @@ Editor.controller = {
       case "cmd_selenium_schedule":
         editor.scheduleButton.checked = !editor.scheduleButton.checked;
         if (editor.scheduleButton.checked) {
+		  editor.scheduleButton.setAttribute("tooltiptext","Scheduler now on, Click to turn Scheduler off")
           //TODO hasJobs() is not enough as there may be jobs that are not valid, need hasValidJobs()
           if (editor.scheduler.hasJobs()) {
             editor.toggleRecordingEnabled(false);
@@ -446,6 +447,7 @@ Editor.controller = {
             }
           }
         } else {
+		  editor.scheduleButton.setAttribute("tooltiptext","Click to turn scheduler on")
           editor.scheduler.stop();
         }
         break;

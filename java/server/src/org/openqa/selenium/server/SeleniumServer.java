@@ -1,19 +1,19 @@
-/*
- * Copyright 2011 Software Freedom Conservancy.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
- */
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 package org.openqa.selenium.server;
 
@@ -243,6 +243,11 @@ public class SeleniumServer implements SslCertificateGenerator {
                                                                                      // infinite
     seleniumProxy = new SeleniumServer(slowResourceProperty(), configuration);
     seleniumProxy.boot();
+
+    // todo: This is still buggy because it should resolve to external port
+    seleniumProxy.LOGGER.info(
+      format("RemoteWebDriver instances should connect to: http://%s:%d/wd/hub",
+             networkUtils.getPrivateLocalAddress(), seleniumProxy.getPort()));
   }
 
   public SeleniumServer() throws Exception {
@@ -338,8 +343,8 @@ public class SeleniumServer implements SslCertificateGenerator {
     String coreRevision = p.getProperty("selenium.core.revision");
     BuildInfo info = new BuildInfo();
     LOGGER.info(String.format(
-        "v%s%s, with Core v%s%s. Built from revision %s",
-        rcVersion, rcRevision, coreVersion, coreRevision, info.getBuildRevision()));
+      "v%s%s, with Core v%s%s. Built from revision %s",
+      rcVersion, rcRevision, coreVersion, coreRevision, info.getBuildRevision()));
   }
 
 
@@ -396,10 +401,6 @@ public class SeleniumServer implements SslCertificateGenerator {
     ServletHandler handler = new ServletHandler();
     handler.addServlet("WebDriver remote server", "/hub/*", DriverServlet.class.getName());
     webdriverContext.addHandler(handler);
-
-    LOGGER.info(format("RemoteWebDriver instances should connect to: http://%s:%d/wd/hub",
-        networkUtils.getPrivateLocalAddress(), getPort())); // todo: This is still buggy because it
-                                                            // should resolve to external port
 
     return webdriverContext;
   }
@@ -690,11 +691,13 @@ public class SeleniumServer implements SslCertificateGenerator {
               userInput);
       Thread t = new Thread(new Runnable() { // Thread safety reviewed
         public void run() {
+
+          InputStream is = null;
           try {
             LOGGER.info("---> Requesting " + url.toString());
             URLConnection conn = url.openConnection();
             conn.connect();
-            InputStream is = conn.getInputStream();
+            is = conn.getInputStream();
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             byte[] buffer = new byte[2048];
             int length;
@@ -714,6 +717,17 @@ public class SeleniumServer implements SslCertificateGenerator {
             System.err.println(e.getMessage());
             if (debugMode) {
               e.printStackTrace();
+            }
+          } finally {
+            if (is != null) {
+              try {
+                is.close();
+              } catch (IOException e) {
+                System.err.println(e.getMessage());
+                if (debugMode) {
+                  e.printStackTrace();
+                }
+              }
             }
           }
         }

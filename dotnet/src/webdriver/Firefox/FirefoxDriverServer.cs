@@ -1,7 +1,9 @@
 ﻿// <copyright file="FirefoxDriverServer.cs" company="WebDriver Committers">
-// Copyright 2014 Software Freedom Conservancy
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -87,7 +89,6 @@ namespace OpenQA.Selenium.Firefox
                     int portToUse = DetermineNextFreePort(this.host, this.profile.Port);
                     this.profile.Port = portToUse;
                     this.profile.WriteToDisk();
-                    this.process.Clean(this.profile);
                     this.process.StartProfile(this.profile, new string[] { "-foreground" });
 
                     this.SetAddress(portToUse);

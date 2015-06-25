@@ -1,5 +1,8 @@
-// Copyright 2011 Software Freedom Conservancy
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -15,6 +18,7 @@
 #define WEBDRIVER_IE_DELETEALLCOOKIESCOMMANDHANDLER_H_
 
 #include "../Browser.h"
+#include "../BrowserCookie.h"
 #include "../IECommandHandler.h"
 #include "../IECommandExecutor.h"
 
@@ -39,11 +43,11 @@ class DeleteAllCookiesCommandHandler : public IECommandHandler {
       return;
     }
 
-    std::map<std::string, std::string> cookies;
+    std::vector<BrowserCookie> cookies;
     browser_wrapper->GetCookies(&cookies);
-    std::map<std::string, std::string>::const_iterator it = cookies.begin();
+    std::vector<BrowserCookie>::const_iterator it = cookies.begin();
     for (; it != cookies.end(); ++it) {
-      std::string cookie_name = it->first;
+      std::string cookie_name = it->name();
       status_code = browser_wrapper->DeleteCookie(cookie_name);
       if (status_code != WD_SUCCESS) {
         response->SetErrorResponse(status_code,

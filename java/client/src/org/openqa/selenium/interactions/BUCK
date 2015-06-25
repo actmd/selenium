@@ -1,11 +1,17 @@
 java_library(name = 'interactions',
   srcs = [
+    'ActionChainExecutor.java',
     'Actions.java',
+    'CanPerformActionChain.java',
   ] + glob(['*Action.java', 'internal/*Action.java', 'touch/*.java']),
   exported_deps = [
     ':core',
     ':exceptions',
     '//java/client/src/org/openqa/selenium:core',
+  ],
+  deps = [
+    ':core',
+    '//third_party/java/guava-libraries:guava-libraries',
   ],
   visibility = ['PUBLIC'],
 )

@@ -1,18 +1,19 @@
-#!/usr/bin/python
-
-# Copyright 2011 Software Freedom Conservancy.
+# Licensed to the Software Freedom Conservancy (SFC) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The SFC licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+#   http://www.apache.org/licenses/LICENSE-2.0
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 
 import unittest
 try:
@@ -162,6 +163,13 @@ class EventFiringWebDriverTests(unittest.TestCase):
             "arguments[0]['flibble'] = arguments[0].getAttribute('id'); return arguments[0]['flibble']",
             button)
         self.assertEqual("plainButton", value)
+    
+    def test_should_unwrap_element_args_when_switching_frames(self):
+        ef_driver = EventFiringWebDriver(self.driver, AbstractEventListener())
+        ef_driver.get(self._pageURL("iframes"))
+        frame = ef_driver.find_element_by_id("iframe1")
+        ef_driver.switch_to.frame(frame)
+        self.assertEqual("click me!", ef_driver.find_element_by_id("imageButton").get_attribute("alt"))
 
     def test_should_be_able_to_access_wrapped_instance_from_event_calls(self):
         driver = self.driver

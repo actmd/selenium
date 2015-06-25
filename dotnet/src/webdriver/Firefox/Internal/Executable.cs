@@ -1,9 +1,9 @@
 ﻿// <copyright file="Executable.cs" company="WebDriver Committers">
-// Copyright 2007-2011 WebDriver committers
-// Copyright 2007-2011 Google Inc.
-// Portions copyright 2011 Software Freedom Conservancy
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -70,7 +70,7 @@ namespace OpenQA.Selenium.Firefox.Internal
             }
 
             throw new WebDriverException("Cannot find Firefox binary in PATH or default install locations. " +
-                "Make sure Firefox is installed. OS appears to be: " + Platform.CurrentPlatform);
+                "Make sure Firefox is installed. OS appears to be: " + Platform.CurrentPlatform.ToString());
         }
         #endregion
 

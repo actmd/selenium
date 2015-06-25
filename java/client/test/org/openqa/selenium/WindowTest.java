@@ -1,19 +1,19 @@
-/*
-Copyright 2011-2012 Selenium committers
-Copyright 2011-2015 Software Freedom Conservancy.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
- */
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 package org.openqa.selenium;
 
@@ -62,6 +62,7 @@ public class WindowTest extends JUnit4TestBase {
     changeSizeBy(-20, -20);
   }
 
+  @NoDriverAfterTest // So that next test never starts with "inside a frame" base state.
   @Test
   public void testSetsTheSizeOfTheCurrentWindowFromFrame() {
     // Browser window cannot be resized or moved on ANDROID (and most mobile platforms
@@ -69,14 +70,11 @@ public class WindowTest extends JUnit4TestBase {
     assumeFalse(TestUtilities.getEffectivePlatform(driver).is(ANDROID));
     driver.get(pages.framesetPage);
     driver.switchTo().frame("fourth");
-    try {
-      // resize relative to the initial size, since we don't know what it is
-      changeSizeBy(-20, -20);
-    } finally {
-      driver.switchTo().defaultContent();
-    }
+    // resize relative to the initial size, since we don't know what it is
+    changeSizeBy(-20, -20);
   }
 
+  @NoDriverAfterTest // So that next test never starts with "inside a frame" base state.
   @Test
   public void testSetsTheSizeOfTheCurrentWindowFromIframe() {
     // Browser window cannot be resized or moved on ANDROID (and most mobile platforms
@@ -84,12 +82,8 @@ public class WindowTest extends JUnit4TestBase {
     assumeFalse(TestUtilities.getEffectivePlatform(driver).is(ANDROID));
     driver.get(pages.iframePage);
     driver.switchTo().frame("iframe1-name");
-    try {
-      // resize relative to the initial size, since we don't know what it is
-      changeSizeBy(-20, -20);
-    } finally {
-      driver.switchTo().defaultContent();
-    }
+    // resize relative to the initial size, since we don't know what it is
+    changeSizeBy(-20, -20);
   }
 
   @Test
@@ -142,6 +136,7 @@ public class WindowTest extends JUnit4TestBase {
     maximize();
   }
 
+  @NoDriverAfterTest // So that next test never starts with "inside a frame" base state.
   @Ignore(value = {PHANTOMJS}, reason = "Not yet implemented.")
   @Test
   public void testCanMaximizeTheWindowFromFrame() throws InterruptedException {
@@ -154,14 +149,11 @@ public class WindowTest extends JUnit4TestBase {
     changeSizeTo(new Dimension(450, 275));
 
     driver.switchTo().frame("fourth");
-    try {
-      maximize();
-    } finally {
-      driver.switchTo().defaultContent();
-    }
+    maximize();
   }
 
   @Ignore(value = {PHANTOMJS}, reason = "Not yet implemented.")
+  @NoDriverAfterTest // So that next test never starts with "inside a frame" base state.
   @Test
   public void testCanMaximizeTheWindowFromIframe() throws InterruptedException {
     // Browser window cannot be resized or moved on ANDROID (and most mobile platforms
@@ -173,11 +165,7 @@ public class WindowTest extends JUnit4TestBase {
     changeSizeTo(new Dimension(450, 275));
 
     driver.switchTo().frame("iframe1-name");
-    try {
-      maximize();
-    } finally {
-      driver.switchTo().defaultContent();
-    }
+    maximize();
   }
 
   private void changeSizeBy(int deltaX, int deltaY) {

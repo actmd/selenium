@@ -1,5 +1,8 @@
-// Copyright 2011 Software Freedom Conservancy
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed to the Software Freedom Conservancy (SFC) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The SFC licenses this file
+// to you under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -24,6 +27,9 @@
 
 namespace webdriver {
 
+class BrowserCookie;
+class CookieManager;
+
 class DocumentHost {
  public:
   DocumentHost(HWND hwnd, HWND executor_handle);
@@ -31,7 +37,7 @@ class DocumentHost {
 
   virtual void GetDocument(IHTMLDocument2** doc) = 0;
   virtual void Close(void) = 0;
-  virtual bool Wait(void) = 0;
+  virtual bool Wait(const std::string& page_load_strategy) = 0;
   virtual bool IsBusy(void) = 0;
   virtual HWND GetContentWindowHandle(void) = 0;
   virtual HWND GetBrowserWindowHandle(void) = 0;
@@ -60,7 +66,7 @@ class DocumentHost {
   static bool IsStandardsMode(IHTMLDocument2* doc);
   static bool GetDocumentDimensions(IHTMLDocument2* doc, LocationInfo* info);
 
-  void GetCookies(std::map<std::string, std::string>* cookies);
+  void GetCookies(std::vector<BrowserCookie>* cookies);
   int AddCookie(const std::string& cookie, const bool validate_document_type);
   int DeleteCookie(const std::string& cookie_name);
   
@@ -97,6 +103,7 @@ class DocumentHost {
   bool IsHtmlPage(IHTMLDocument2* doc);
   int SetFocusedFrameByIdentifier(VARIANT frame_identifier);
 
+  CookieManager* cookie_manager_;
   CComPtr<IHTMLWindow2> focused_frame_window_;
   HWND window_handle_;
   HWND executor_handle_;

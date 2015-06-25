@@ -1,17 +1,19 @@
-# Copyright 2008-2011 WebDriver committers
-# Copyright 2008-2011 Google Inc.
+# Licensed to the Software Freedom Conservancy (SFC) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The SFC licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+#   http://www.apache.org/licenses/LICENSE-2.0
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 
 
 import os
@@ -64,7 +66,7 @@ class FirefoxBinary(object):
 
         self._start_from_profile_path(self.profile.path)
         self._wait_until_connectable()
- 
+
     def kill(self):
         """Kill the browser.
 
@@ -79,14 +81,10 @@ class FirefoxBinary(object):
 
         if platform.system().lower() == 'linux':
             self._modify_link_library_path()
-        command = [self._start_cmd, "-silent"]
+        command = [self._start_cmd, "-foreground"]
         if self.command_line is not None:
             for cli in self.command_line:
                 command.append(cli)
-
-        Popen(command, stdout=self._log_file, stderr=STDOUT,
-              env=self._firefox_env).communicate()
-        command[1] = '-foreground'
         self.process = Popen(
             command, stdout=self._log_file, stderr=STDOUT,
             env=self._firefox_env)
@@ -137,7 +135,7 @@ class FirefoxBinary(object):
 
         if not command:
             return ""
- 
+
         return shlex.split(command)[0]
 
     def _get_firefox_start_cmd(self):
@@ -146,7 +144,7 @@ class FirefoxBinary(object):
         if platform.system() == "Darwin":
             start_cmd = ("/Applications/Firefox.app/Contents/MacOS/firefox-bin")
         elif platform.system() == "Windows":
-            start_cmd = (self._find_exe_in_registry() or 
+            start_cmd = (self._find_exe_in_registry() or
                 self._default_windows_location())
         elif platform.system() == 'Java' and os._name == 'nt':
             start_cmd = self._default_windows_location()
@@ -157,7 +155,7 @@ class FirefoxBinary(object):
                     break
             else:
                 # couldn't find firefox on the system path
-                raise RuntimeError("Could not find firefox in your system PATH." + 
+                raise RuntimeError("Could not find firefox in your system PATH." +
                     " Please specify the firefox binary location or install firefox")
         return start_cmd
 
@@ -197,7 +195,7 @@ class FirefoxBinary(object):
         return built_path
 
     def which(self, fname):
-        """Returns the fully qualified path by searching Path of the given 
+        """Returns the fully qualified path by searching Path of the given
         name"""
         for pe in os.environ['PATH'].split(os.pathsep):
             checkname = os.path.join(pe, fname)
