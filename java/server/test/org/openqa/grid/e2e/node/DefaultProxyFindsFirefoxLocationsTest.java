@@ -40,6 +40,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.remote.BrowserType;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.server.SeleniumServer;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -102,6 +103,7 @@ public class DefaultProxyFindsFirefoxLocationsTest {
     caps.setVersion("30");
     remote.addBrowser(caps, 1);
 
+    remote.setRemoteServer(new SeleniumServer(remote.getConfiguration()));
     remote.startRemoteServer();
     remote.sendRegistrationRequest();
     RegistryTestHelper.waitForNode(registry, 1);
@@ -114,7 +116,7 @@ public class DefaultProxyFindsFirefoxLocationsTest {
 
     // firefox
 
-    req_caps = new HashMap<String, Object>();
+    req_caps = new HashMap<>();
     req_caps.put(CapabilityType.BROWSER_NAME, BrowserType.FIREFOX);
     req_caps.put(CapabilityType.VERSION, "7");
     newSessionRequest = new MockedRequestHandler(getNewRequest(req_caps));
@@ -123,7 +125,7 @@ public class DefaultProxyFindsFirefoxLocationsTest {
                  newSessionRequest.getSession().getRequestedCapabilities()
                      .get(FirefoxDriver.BINARY));
 
-    req_caps = new HashMap<String, Object>();
+    req_caps = new HashMap<>();
     req_caps.put(CapabilityType.BROWSER_NAME, BrowserType.FIREFOX);
     req_caps.put(CapabilityType.VERSION, "3");
     newSessionRequest = new MockedRequestHandler(getNewRequest(req_caps));
@@ -132,7 +134,7 @@ public class DefaultProxyFindsFirefoxLocationsTest {
                  newSessionRequest.getSession().getRequestedCapabilities()
                      .get(FirefoxDriver.BINARY));
 
-    req_caps = new HashMap<String, Object>();
+    req_caps = new HashMap<>();
     req_caps.put(CapabilityType.BROWSER_NAME, BrowserType.FIREFOX);
     req_caps.put(CapabilityType.VERSION, "20");
     req_caps.put(FirefoxDriver.BINARY, "custom");
@@ -144,7 +146,7 @@ public class DefaultProxyFindsFirefoxLocationsTest {
 
     // chrome
 
-    req_caps = new HashMap<String, Object>();
+    req_caps = new HashMap<>();
     req_caps.put(CapabilityType.BROWSER_NAME, BrowserType.CHROME);
     req_caps.put(CapabilityType.VERSION, "27");
     newSessionRequest = new MockedRequestHandler(getNewRequest(req_caps));
@@ -153,7 +155,7 @@ public class DefaultProxyFindsFirefoxLocationsTest {
     Map<String, Object> json = (Map<String, Object>) newSessionRequest.getSession().getRequestedCapabilities().get(ChromeOptions.CAPABILITY);
     assertEquals(locationChrome27, json.get("binary"));
 
-    req_caps = new HashMap<String, Object>();
+    req_caps = new HashMap<>();
     req_caps.put(CapabilityType.BROWSER_NAME, BrowserType.CHROME);
     req_caps.put(CapabilityType.VERSION, "29");
     newSessionRequest = new MockedRequestHandler(getNewRequest(req_caps));
@@ -162,10 +164,10 @@ public class DefaultProxyFindsFirefoxLocationsTest {
     json = (Map<String, Object>) newSessionRequest.getSession().getRequestedCapabilities().get(ChromeOptions.CAPABILITY);
     assertEquals(locationChrome29, json.get("binary"));
 
-    req_caps = new HashMap<String, Object>();
+    req_caps = new HashMap<>();
     req_caps.put(CapabilityType.BROWSER_NAME, BrowserType.CHROME);
     req_caps.put(CapabilityType.VERSION, "29");
-    Map<String, Object> options = new HashMap<String, Object>();
+    Map<String, Object> options = new HashMap<>();
     options.put("test1", "test2");
     req_caps.put(ChromeOptions.CAPABILITY, options);
     newSessionRequest = new MockedRequestHandler(getNewRequest(req_caps));
@@ -175,10 +177,10 @@ public class DefaultProxyFindsFirefoxLocationsTest {
     assertEquals(locationChrome29, json.get("binary"));
     assertEquals("test2", json.get("test1"));
 
-    req_caps = new HashMap<String, Object>();
+    req_caps = new HashMap<>();
     req_caps.put(CapabilityType.BROWSER_NAME, BrowserType.CHROME);
     req_caps.put(CapabilityType.VERSION, "30");
-    options = new HashMap<String, Object>();
+    options = new HashMap<>();
     options.put("test11", "test22");
     options.put("binary", "custom");
     req_caps.put(ChromeOptions.CAPABILITY, options);

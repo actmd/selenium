@@ -5,6 +5,7 @@ rubygem(
     "//rb:chrome",
     "//rb:common",
     "//rb:support",
+    "//rb:edge",
     "//rb:firefox",
     "//rb:ie",
     "//rb:iphone",
@@ -17,11 +18,12 @@ rubygem(
 
 rubydocs(
   files = [
-    "rb/lib/**/*.rb",
-    "CHANGES"
+    "build/rb/lib/**/*.rb",
+    "build/rb/CHANGES"
   ],
   readme = "rb/README.md",
-  output_dir = "docs/api/rb"
+  output_dir = "build/docs/api/rb",
+  deps = [ "//rb:gem:build" ]
 )
 
 ruby_library(name = "common",
@@ -88,6 +90,35 @@ ruby_test(name = "chrome",
   ],
   include = ["rb/spec/integration", "build/rb/lib"],
   deps = [ ":chrome"  ]
+)
+
+ruby_library(name = "edge",
+  srcs = [
+    "lib/selenium/webdriver/edge/**/*.rb",
+    "lib/selenium/webdriver/edge.rb"
+  ],
+  deps = [
+    ":common",
+    ":remote"
+  ]
+)
+
+ruby_test(name = "edge",
+  srcs = [
+    "spec/integration/selenium/webdriver/*_spec.rb",
+    "spec/integration/selenium/webdriver/edge/**/*_spec.rb"
+  ],
+  include = ["rb/spec/integration", "build/rb/lib"],
+  deps = [ ":edge"  ]
+)
+
+ruby_test(name = "marionette",
+  srcs = [
+    "spec/integration/selenium/webdriver/*_spec.rb",
+    "spec/integration/selenium/webdriver/firefox/**/*_spec.rb"
+  ],
+  include = ["rb/spec/integration", "build/rb/lib"],
+  deps = [ ":firefox"  ]
 )
 
 ruby_library(name = "firefox",
@@ -196,6 +227,91 @@ ruby_test(name = "remote",
   ]
 )
 
+ruby_test(name = "remote-chrome",
+  srcs = [
+    "spec/integration/selenium/webdriver/*_spec.rb",
+    "spec/integration/selenium/webdriver/remote/**/*_spec.rb"
+  ],
+  include = ["rb/spec/integration", "build/rb/lib"],
+  deps = [
+    "//java/server/test/org/openqa/selenium:server-with-tests:uber",
+    ":remote"
+  ]
+)
+
+ruby_test(name = "remote-firefox",
+  srcs = [
+    "spec/integration/selenium/webdriver/*_spec.rb",
+    "spec/integration/selenium/webdriver/remote/**/*_spec.rb"
+  ],
+  include = ["rb/spec/integration", "build/rb/lib"],
+  deps = [
+    "//java/server/test/org/openqa/selenium:server-with-tests:uber",
+    ":remote"
+  ]
+)
+
+ruby_test(name = "remote-phantomjs",
+  srcs = [
+    "spec/integration/selenium/webdriver/*_spec.rb",
+    "spec/integration/selenium/webdriver/remote/**/*_spec.rb"
+  ],
+  include = ["rb/spec/integration", "build/rb/lib"],
+  deps = [
+    "//java/server/test/org/openqa/selenium:server-with-tests:uber",
+    ":remote"
+  ]
+)
+
+ruby_test(name = "remote-safari",
+  srcs = [
+    "spec/integration/selenium/webdriver/*_spec.rb",
+    "spec/integration/selenium/webdriver/remote/**/*_spec.rb"
+  ],
+  include = ["rb/spec/integration", "build/rb/lib"],
+  deps = [
+    "//java/server/test/org/openqa/selenium:server-with-tests:uber",
+    ":remote"
+  ]
+)
+
+ruby_test(name = "remote-ie",
+  srcs = [
+    "spec/integration/selenium/webdriver/*_spec.rb",
+    "spec/integration/selenium/webdriver/remote/**/*_spec.rb"
+  ],
+  include = ["rb/spec/integration", "build/rb/lib"],
+  deps = [
+    "//java/server/test/org/openqa/selenium:server-with-tests:uber",
+    ":remote"
+  ]
+)
+
+ruby_test(name = "remote-edge",
+  srcs = [
+    "spec/integration/selenium/webdriver/*_spec.rb",
+    "spec/integration/selenium/webdriver/remote/**/*_spec.rb"
+  ],
+  include = ["rb/spec/integration", "build/rb/lib"],
+  deps = [
+    "//java/server/test/org/openqa/selenium:server-with-tests:uber",
+    ":remote"
+  ]
+)
+
+ruby_test(name = "remote-marionette",
+  srcs = [
+    "spec/integration/selenium/webdriver/*_spec.rb",
+    "spec/integration/selenium/webdriver/remote/**/*_spec.rb"
+  ],
+  include = ["rb/spec/integration", "build/rb/lib"],
+  deps = [
+    "//java/server/test/org/openqa/selenium:server-with-tests:uber",
+    ":remote",
+    ":firefox"
+  ]
+)
+
 ruby_library(name = "safari",
   srcs = [
     "lib/selenium/webdriver/safari/**/*.rb",
@@ -206,7 +322,6 @@ ruby_library(name = "safari",
     ":remote",
   ],
   resources = [
-    { "//javascript/safari-driver/prebuilt:SafariDriver": "rb/lib/selenium/webdriver/safari/resources/SafariDriver.safariextz"},
     { "//javascript/safari-driver:client": "rb/lib/selenium/webdriver/safari/resources/client.js"}
   ]
 )
@@ -245,6 +360,7 @@ ruby_test(name = "unit",
     ":android",
     ":chrome",
     ":common",
+    ":edge",
     ":firefox",
     ":ie",
     ":iphone",

@@ -2,7 +2,7 @@ java_library(name = 'safari',
   srcs = glob(['*.java']),
   resources = [
     ':client',
-    ':extension',
+    '//javascript/safari-driver:safari-driver',
   ],
   deps = [
     '//java/client/src/org/openqa/selenium:codecs',
@@ -23,9 +23,4 @@ java_library(name = 'safari',
 export_file(name = 'client',
   src = '//javascript/safari-driver:client',
   out = 'client.js',
-)
-
-export_file(name = 'extension',
-  src = '//javascript/safari-driver/prebuilt:extension',
-  out = 'SafariDriver.safariextz',
 )

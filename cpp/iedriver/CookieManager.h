@@ -33,9 +33,10 @@ class CookieManager {
   static unsigned int WINAPI ThreadProc(LPVOID lpParameter);
 
   void Initialize(HWND window_handle);
-  int GetCookies(std::string url,
+  int GetCookies(const std::string& url,
                  std::vector<BrowserCookie>* all_cookies);
-  bool SetCookie(std::string url, std::string cookie_data);
+  int SetCookie(const std::string& url, const BrowserCookie& cookie);
+  bool DeleteCookie(const std::string& url, const BrowserCookie& cookie);
 
  private:
   std::wstring SendGetCookieMessage(const std::wstring& url,
@@ -45,7 +46,12 @@ class CookieManager {
                          std::map<std::string, std::string>* cookies);
   BrowserCookie ParsePersistentCookieInfo(const std::string& cookie);
   void ReadPersistentCookieFile(const std::wstring& file_name,
+                                const bool include_secure_cookies,
                                 std::map<std::string, BrowserCookie>* cookies);
+
+  bool RecursivelyDeleteCookie(const std::string& url, const BrowserCookie& cookie);
+  bool RecurseCookiePath(const std::string& url, const BrowserCookie& cookie);
+  bool RecurseCookieDomain(const std::string& url, const BrowserCookie& cookie);
 
   HWND window_handle_;
 };

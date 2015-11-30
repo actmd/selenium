@@ -1,6 +1,82 @@
+## v2.49.0-dev
+
+* Added `promise.Promise#catch()` for API compatibility with native Promises.
+    `promise.Promise#thenCatch()` is not yet deprecated, but it simply
+    delegates to `catch`.
+* Changed some `io` operations to use native promises.
+* Changed `webdriver.CommandExecutor#execute()` and `HttpClient` to return
+    promises instead of using callback passing.
+* Rewrote the `error` module to export an Error subtype for each type of error
+    defined in the [W3C WebDriver spec](https://w3c.github.io/webdriver/webdriver-spec.html#handling-errors).
+    For the export types, the `code` property is now the string code used by
+    the W3C spec and _not_ the numeric code used by the Selenium project's
+    wire protocol.
+
+### Changes for W3C WebDriver Spec Compliance
+
+* Updated the `By` locators that are not in the W3C spec to delegated to using
+    CSS selectors: `By.className`, `By.id`, `By.name`, and `By.tagName`.
+
+## v2.48.2
+
+* Added `WebElement#takeScreenshot()`.
+* More adjustments to promise callback tracking.
+
+## v2.48.1
+
+* FIXED: Adjusted how the control flow tracks promise callbacks to avoid a
+    potential deadlock.
+
+## v2.48.0
+
+* Node v0.12.x users must run with --harmony. _This is the last release that
+    will support v0.12.x_
+* FIXED: (Promise/A+ compliance) When a promise is rejected with a thenable,
+    the promise adopts the thenable as its rejection reason instead of waiting
+    for it to settle. The previous (incorrect) behavior was hidden by bugs in
+    the `promises-aplus-tests` compliance test suite that were fixed in version
+    `2.1.1`.
+* FIXED: the `webdriver.promise.ControlFlow` now has a consistent execution
+    order for tasks/callbacks scheduled in different turns of the JS event loop.
+    Refer to the `webdriver.promise` documentation for more details.
+* FIXED: do not drop user auth from the WebDriver server URL.
+* FIXED: a single `firefox.Binary` instance may be used to configure and
+    launch multiple FirefoxDriver sessions.
+
+      var binary = new firefox.Binary();
+      var options = new firefox.Options().setBinary(binary);
+      var builder = new Builder().setFirefoxOptions(options);
+
+      var driver1 = builder.build();
+      var driver2 = builder.build();
+
+* FIXED: zip files created for transfer to a remote WebDriver server are no
+    longer compressed. If the zip contained a file that was already compressed,
+    the server would return an "invalid code lengths set" error.
+* FIXED: Surfaced the `loopback` option to `remote/SeleniumServer`. When set,
+    the server will be accessed using the current host's loopback address.
+
+## v2.47.0
+
+### Notice
+
+This is the last release for `selenium-webdriver` that will support ES5.
+Subsequent releases will depend on ES6 features that are enabled by
+[default](https://nodejs.org/en/docs/es6/) in Node v4.0.0. Node v0.12.x will
+continue to be supported, but will require setting the `--harmony` flag.
+
+### Change Summary
+
+* Add support for [Node v4.0.0](https://nodejs.org/en/blog/release/v4.0.0/)
+    * Updated `ws` dependency from `0.7.1` to `0.8.0`
+* Bumped the minimum supported version of Node from `0.10.x` to `0.12.x`. This
+    is in accordance with the Node support policy established in `v2.45.0`.
+
 ## v2.46.1
 
 * Fixed internal module loading on Windows.
+* Fixed error message format on timeouts for `until.elementLocated()`
+    and `until.elementsLocated()`.
 
 ## v2.46.0
 

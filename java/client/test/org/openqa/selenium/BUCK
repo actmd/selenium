@@ -11,7 +11,7 @@ java_test(name = 'small-tests',
   ],
 )
 
-java_test(name = 'large-tests',
+java_library(name = 'large-tests',
   srcs = [
     'StandardSeleniumTests.java',
   ],
@@ -88,6 +88,7 @@ java_library(name = 'tests',
     '//java/client/src/org/openqa/selenium:codecs',
     '//java/client/src/org/openqa/selenium:webdriver-api',
     '//java/client/src/org/openqa/selenium/ie:ie',
+    '//java/client/src/org/openqa/selenium/htmlunit:htmlunit',
     '//java/client/src/org/openqa/selenium/io:io',
     '//java/client/src/org/openqa/selenium/net:net',
     '//java/client/src/org/openqa/selenium/os:os',

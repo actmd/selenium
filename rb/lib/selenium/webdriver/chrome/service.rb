@@ -24,6 +24,7 @@ module Selenium
       #
       # @api private
       #
+
       class Service
         START_TIMEOUT       = 20
         SOCKET_LOCK_TIMEOUT = 45
@@ -77,7 +78,7 @@ module Selenium
             http.open_timeout = STOP_TIMEOUT / 2
             http.read_timeout = STOP_TIMEOUT / 2
 
-            http.head("/shutdown")
+            http.get("/shutdown")
           end
 
           @process.poll_for_exit STOP_TIMEOUT
@@ -89,6 +90,8 @@ module Selenium
         def uri
           URI.parse "http://#{@host}:#{@port}"
         end
+
+        private
 
         def find_free_port
           @port = PortProber.above @port
@@ -103,9 +106,9 @@ module Selenium
         end
 
         def connect_until_stable
-          @socket_poller = SocketPoller.new @host, @port, START_TIMEOUT
+          socket_poller = SocketPoller.new @host, @port, START_TIMEOUT
 
-          unless @socket_poller.connected?
+          unless socket_poller.connected?
             raise Error::WebDriverError, "unable to connect to chromedriver #{@host}:#{@port}"
           end
         end

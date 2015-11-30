@@ -164,6 +164,7 @@ class FirefoxProfile(object):
         A zipped, base64 encoded string of profile directory
         for use with remote WebDriver JSON wire protocol
         """
+        self.update_preferences()
         fp = BytesIO()
         zipped = zipfile.ZipFile(fp, 'w', zipfile.ZIP_DEFLATED)
         path_root = len(self.path) + 1  # account for trailing slash
@@ -253,8 +254,9 @@ class FirefoxProfile(object):
             tmpdir = tempfile.mkdtemp(suffix='.' + os.path.split(addon)[-1])
             compressed_file = zipfile.ZipFile(addon, 'r')
             for name in compressed_file.namelist():
-                if name.endswith('/') and not os.path.isdir(os.path.join(tmpdir, name)):
-                    os.makedirs(os.path.join(tmpdir, name))
+                if name.endswith('/'):
+                    if not os.path.isdir(os.path.join(tmpdir, name)):
+                        os.makedirs(os.path.join(tmpdir, name))
                 else:
                     if not os.path.isdir(os.path.dirname(os.path.join(tmpdir, name))):
                         os.makedirs(os.path.dirname(os.path.join(tmpdir, name)))

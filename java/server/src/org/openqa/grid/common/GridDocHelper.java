@@ -22,7 +22,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonParser;
 
-import org.openqa.selenium.server.cli.RemoteControlLauncher;
+import org.openqa.grid.shared.CliUtils;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -44,7 +44,7 @@ public class GridDocHelper {
 
   public static void printHubHelp(String msg, boolean error) {
     printHelpInConsole(msg, "hub", hubOptions, error);
-    RemoteControlLauncher.printWrappedLine(
+    CliUtils.printWrappedLine(
       "",
       "This synopsis lists options available in hub role only. To get help on the command line options available for other roles run the server with -help name and the corresponding -role name value.");
   }
@@ -55,7 +55,7 @@ public class GridDocHelper {
 
   public static void printNodeHelp(String msg, boolean error) {
     printHelpInConsole(msg, "node", nodeOptions, error);
-    RemoteControlLauncher.printWrappedLine(
+    CliUtils.printWrappedLine(
       "",
       "This synopsis lists options available in node role only. To get help on the command line options available for other roles run the server with -help name and the corresponding -role name value.");
   }
@@ -64,7 +64,7 @@ public class GridDocHelper {
 
   public static String getHubParam(String param) {
     if (hubOptionsMap == null) {
-      hubOptionsMap = new HashMap<String, String>();
+      hubOptionsMap = new HashMap<>();
       for (Option option : hubOptions) {
         hubOptionsMap.put(option.name, option.description);
       }
@@ -90,14 +90,14 @@ public class GridDocHelper {
     System.out.println("Usage: java -jar selenium-server.jar -role " + role + " [options]\n");
     for (Option option : options) {
       System.out.println(indent + "-" + option.name + ":");
-      RemoteControlLauncher.printWrappedLine(System.out, indent2x, option.description, true);
+      CliUtils.printWrappedLine(System.out, indent2x, option.description, true);
       System.out.println("");
     }
   }
 
   private static List<Option> load(String resource) {
     InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(resource);
-    List<Option> result = new ArrayList<Option>();
+    List<Option> result = new ArrayList<>();
     try {
       JsonElement json = new JsonParser().parse(new InputStreamReader(in));
       for (JsonElement element : json.getAsJsonArray()) {

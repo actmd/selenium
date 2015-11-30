@@ -52,7 +52,8 @@
     "toolkit.networkmanager.disable": true,
     "toolkit.telemetry.prompted": 2,
     "toolkit.telemetry.enabled": false,
-    "toolkit.telemetry.rejected": true
+    "toolkit.telemetry.rejected": true,
+    "xpinstall.signatures.required": false
   },
   "mutable": {
     "browser.dom.window.dump.enabled": true,
@@ -60,12 +61,14 @@
     "browser.newtabpage.enabled": false,
     "browser.startup.page": 0,
     "browser.startup.homepage": "about:blank",
+    "browser.usedOnWindows10.introURL": "about:blank",
     "dom.max_chrome_script_run_time": 30,
     "dom.max_script_run_time": 30,
     "dom.report_all_js_exceptions": true,
     "javascript.options.showInConsole": true,
     "network.http.max-connections-per-server": 10,
     "startup.homepage_welcome_url": "about:blank",
+    "startup.homepage_welcome_url.additional": "about:blank",
     "webdriver_accept_untrusted_certs": true,
     "webdriver_assume_untrusted_issuer": true
   }

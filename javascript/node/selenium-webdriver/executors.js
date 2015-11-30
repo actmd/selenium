@@ -22,7 +22,7 @@
 
 var HttpClient = require('./http').HttpClient,
     HttpExecutor = require('./http').Executor,
-    promise = require('./_base').require('webdriver.promise');
+    promise = require('./lib/_base').require('webdriver.promise');
 
 
 
@@ -37,10 +37,8 @@ var HttpClient = require('./http').HttpClient,
 var DeferredExecutor = function(delegate) {
 
   /** @override */
-  this.execute = function(command, callback) {
-    delegate.then(function(executor) {
-      executor.execute(command, callback);
-    }, callback);
+  this.execute = function(command) {
+    return delegate.then(executor => executor.execute(command));
   };
 };
 

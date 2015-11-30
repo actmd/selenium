@@ -38,7 +38,6 @@ namespace OpenQA.Selenium.Remote
             this.driver = driver;
         }
 
-        #region IAlert Members
         /// <summary>
         /// Gets the text of the alert.
         /// </summary>
@@ -74,9 +73,29 @@ namespace OpenQA.Selenium.Remote
         public void SendKeys(string keysToSend)
         {
             Dictionary<string, object> parameters = new Dictionary<string, object>();
-            parameters.Add("text", keysToSend);
+            if (this.driver.IsSpecificationCompliant)
+            {
+                parameters.Add("message", keysToSend);
+            }
+            else
+            {
+                parameters.Add("text", keysToSend);
+            }
+
             this.driver.InternalExecute(DriverCommand.SetAlertValue, parameters);
         }
-        #endregion
+
+        /// <summary>
+        /// Sets the user name and password in an alert prompting for credentials.
+        /// </summary>
+        /// <param name="userName">The user name to set.</param>
+        /// <param name="password">The password to set.</param>
+        public void SetAuthenticationCredentials(string userName, string password)
+        {
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            parameters.Add("username", userName);
+            parameters.Add("password", password);
+            this.driver.InternalExecute(DriverCommand.SetAlertCredentials, parameters);
+        }
     }
 }

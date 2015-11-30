@@ -36,8 +36,8 @@ InputManager::InputManager() {
   this->is_alt_pressed_ = false;
   this->is_control_pressed_ = false;
   this->is_shift_pressed_ = false;
-  this->last_known_mouse_x_ = 0;
-  this->last_known_mouse_y_ = 0;
+  this->last_known_mouse_x_ = -1;
+  this->last_known_mouse_y_ = -1;
 
   CComVariant keyboard_state;
   keyboard_state.vt = VT_NULL;
@@ -199,7 +199,7 @@ bool InputManager::WaitForInputEventProcessing(int input_count) {
 
 bool InputManager::SetFocusToBrowser(BrowserHandle browser_wrapper) {
   LOG(TRACE) << "Entering InputManager::SetFocusToBrowser";
-  DWORD lock_timeout = 0;
+  UINT_PTR lock_timeout = 0;
   DWORD process_id = 0;
   DWORD thread_id = ::GetWindowThreadProcessId(browser_wrapper->GetContentWindowHandle(), &process_id);
   DWORD current_thread_id = ::GetCurrentThreadId();
@@ -213,7 +213,7 @@ bool InputManager::SetFocusToBrowser(BrowserHandle browser_wrapper) {
     }
     ::SetForegroundWindow(browser_wrapper->GetTopLevelWindowHandle());
     if (current_thread_id != thread_id) {
-      ::SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, (PVOID)lock_timeout, SPIF_SENDWININICHANGE | SPIF_UPDATEINIFILE);
+      ::SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, reinterpret_cast<void*>(lock_timeout), SPIF_SENDWININICHANGE | SPIF_UPDATEINIFILE);
       ::AttachThreadInput(current_thread_id, thread_id, FALSE);
     }
   }
@@ -523,6 +523,14 @@ int InputManager::SendKeystrokes(BrowserHandle browser_wrapper, Json::Value keys
   }
   if (this->enable_native_events()) {
     HWND window_handle = browser_wrapper->GetContentWindowHandle();
+    HookProcessor hook;
+    if (!hook.CanSetWindowsHook(window_handle)) {
+      LOG(WARN) << "SENDING KEYSTROKES WILL BE SLOW! There is a mismatch "
+                << "in the bitness between the driver and browser. In "
+                << "particular, be sure you are not attempting to use a "
+                << "64-bit IEDriverServer.exe against IE 10 or 11, even on "
+                << "64-bit Windows.";
+    }
     if (this->require_window_focus_) {
       LOG(DEBUG) << "Queueing Sendinput structures for sending keys";
       for (unsigned int char_index = 0; char_index < keys.size(); ++char_index) {

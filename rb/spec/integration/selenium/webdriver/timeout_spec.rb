@@ -17,7 +17,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-require File.expand_path("../spec_helper", __FILE__)
+require_relative 'spec_helper'
 
 describe "Timeouts" do
 
@@ -38,14 +38,14 @@ describe "Timeouts" do
 
     it "should still fail to find an element with implicit waits enabled" do
       driver.manage.timeouts.implicit_wait = 0.5
-      lambda { driver.find_element(:id => "box0") }.should raise_error(WebDriver::Error::NoSuchElementError)
+      expect { driver.find_element(:id => "box0") }.to raise_error(WebDriver::Error::NoSuchElementError)
     end
 
     it "should return after first attempt to find one after disabling implicit waits" do
       driver.manage.timeouts.implicit_wait = 3
       driver.manage.timeouts.implicit_wait = 0
 
-      lambda { driver.find_element(:id => "box0") }.should raise_error(WebDriver::Error::NoSuchElementError)
+      expect { driver.find_element(:id => "box0") }.to raise_error(WebDriver::Error::NoSuchElementError)
     end
 
     it "should implicitly wait until at least one element is found when searching for many" do
@@ -55,34 +55,34 @@ describe "Timeouts" do
       add.click
       add.click
 
-      driver.find_elements(:class_name => "redbox").should_not be_empty
+      expect(driver.find_elements(:class_name => "redbox")).not_to be_empty
     end
 
     it "should still fail to find elements when implicit waits are enabled" do
       driver.manage.timeouts.implicit_wait = 0.5
-      driver.find_elements(:class_name => "redbox").should be_empty
+      expect(driver.find_elements(:class_name => "redbox")).to be_empty
     end
 
-    it "should return after first attempt to find many after disabling implicit waits" do
-      add = driver.find_element(:id => "adder")
+    not_compliant_on :browser => :marionette, :platform => :windows do
+      it "should return after first attempt to find many after disabling implicit waits" do
+        add = driver.find_element(:id => "adder")
 
-      driver.manage.timeouts.implicit_wait = 3
-      driver.manage.timeouts.implicit_wait = 0
-      add.click
+        driver.manage.timeouts.implicit_wait = 3
+        driver.manage.timeouts.implicit_wait = 0
+        add.click
 
-      driver.find_elements(:class_name => "redbox").should be_empty
-    end
-  end
-
-  context "page loads" do
-    after { driver.manage.timeouts.page_load = -1 }
-
-    compliant_on :browser => :firefox do
-      it "should be able to set the page load timeout" do
-        driver.manage.timeouts.page_load = 2
-        # TODO: actually test something
+        expect(driver.find_elements(:class_name => "redbox")).to be_empty
       end
     end
   end
 
+  not_compliant_on :browser => :edge do
+    context "page loads" do
+      after { driver.manage.timeouts.page_load = -1 }
+
+      it "should be able to set the page load timeout" do
+        expect { driver.manage.timeouts.page_load = 2 }.to_not raise_exception
+      end
+    end
+  end
 end

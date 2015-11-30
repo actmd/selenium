@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementSelectionStateToBe;
 import static org.openqa.selenium.support.ui.ExpectedConditions.not;
+import static org.openqa.selenium.support.ui.ExpectedConditions.numberOfWindowsToBe;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.urlContains;
 import static org.openqa.selenium.support.ui.ExpectedConditions.urlMatches;
@@ -36,6 +37,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllE
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -48,9 +50,11 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -268,20 +272,20 @@ public class ExpectedConditionsTest {
 
   @Test
   public void waitingForVisibilityOfAllElementsLocatedByReturnsListOfElements() {
-    List webElements = Lists.newArrayList(mockElement);
+    List<WebElement> webElements = Lists.newArrayList(mockElement);
     String testSelector = "testSelector";
 
     when(mockDriver.findElements(By.cssSelector(testSelector))).thenReturn(webElements);
     when(mockElement.isDisplayed()).thenReturn(true);
 
-    List returnedElements =
+    List<WebElement> returnedElements =
         wait.until(visibilityOfAllElementsLocatedBy(By.cssSelector(testSelector)));
     assertEquals(webElements, returnedElements);
   }
 
   @Test(expected = TimeoutException.class)
   public void waitingForVisibilityOfAllElementsLocatedByThrowsTimeoutExceptionWhenElementNotDisplayed() {
-    List webElements = Lists.newArrayList(mockElement);
+    List<WebElement> webElements = Lists.newArrayList(mockElement);
     String testSelector = "testSelector";
 
     when(mockDriver.findElements(By.cssSelector(testSelector))).thenReturn(webElements);
@@ -292,7 +296,7 @@ public class ExpectedConditionsTest {
 
   @Test(expected = StaleElementReferenceException.class)
   public void waitingForVisibilityOfAllElementsLocatedByThrowsStaleExceptionWhenElementIsStale() {
-    List webElements = Lists.newArrayList(mockElement);
+    List<WebElement> webElements = Lists.newArrayList(mockElement);
     String testSelector = "testSelector";
 
     when(mockDriver.findElements(By.cssSelector(testSelector))).thenReturn(webElements);
@@ -303,7 +307,7 @@ public class ExpectedConditionsTest {
 
   @Test(expected = TimeoutException.class)
   public void waitingForVisibilityOfAllElementsLocatedByThrowsTimeoutExceptionWhenNoElementsFound() {
-    List webElements = Lists.newArrayList();
+    List<WebElement> webElements = Lists.newArrayList();
     String testSelector = "testSelector";
 
     when(mockDriver.findElements(By.cssSelector(testSelector))).thenReturn(webElements);
@@ -322,7 +326,7 @@ public class ExpectedConditionsTest {
 
   @Test(expected = TimeoutException.class)
   public void waitingForVisibilityOfAllElementsThrowsTimeoutExceptionWhenElementNotDisplayed() {
-    List webElements = Lists.newArrayList(mockElement);
+    List<WebElement> webElements = Lists.newArrayList(mockElement);
     when(mockElement.isDisplayed()).thenReturn(false);
 
     wait.until(visibilityOfAllElements(webElements));
@@ -330,7 +334,7 @@ public class ExpectedConditionsTest {
 
   @Test(expected = StaleElementReferenceException.class)
   public void waitingForVisibilityOfAllElementsThrowsStaleElementReferenceExceptionWhenElementIsStale() {
-    List webElements = Lists.newArrayList(mockElement);
+    List<WebElement> webElements = Lists.newArrayList(mockElement);
 
     when(mockElement.isDisplayed()).thenThrow(new StaleElementReferenceException("Stale element"));
 
@@ -339,7 +343,7 @@ public class ExpectedConditionsTest {
 
   @Test(expected = TimeoutException.class)
   public void waitingForVisibilityOfAllElementsThrowsTimeoutExceptionWhenNoElementsFound() {
-    List webElements = Lists.newArrayList();
+    List<WebElement> webElements = Lists.newArrayList();
 
     wait.until(visibilityOfAllElements(webElements));
   }
@@ -432,14 +436,41 @@ public class ExpectedConditionsTest {
   public void waitingElementSelectionStateToBeThrowsTimeoutExceptionWhenStateDontMatch() {
     when(mockElement.isSelected()).thenReturn(true);
 
-    assertTrue(wait.until(elementSelectionStateToBe(mockElement, false)));
+    wait.until(elementSelectionStateToBe(mockElement, false));
   }
 
   @Test(expected = StaleElementReferenceException.class)
   public void waitingElementSelectionStateToBeThrowsStaleExceptionWhenElementIsStale() {
     when(mockElement.isSelected()).thenThrow(new StaleElementReferenceException("Stale element"));
 
-    assertTrue(wait.until(elementSelectionStateToBe(mockElement, false)));
+    wait.until(elementSelectionStateToBe(mockElement, false));
+  }
+
+  @Test
+  public void waitingNumberOfWindowsToBeTwoWhenThereAreTwoWindowsOpen() {
+    Set<String> twoWindowHandles = Sets.newHashSet("w1", "w2");
+    when(mockDriver.getWindowHandles()).thenReturn(twoWindowHandles);
+
+    assertTrue(wait.until(numberOfWindowsToBe(2)));
+  }
+
+  @Test(expected = TimeoutException.class)
+  public void waitingNumberOfWindowsToBeTwoThrowsTimeoutExceptionWhenThereAreThreeWindowsOpen() {
+    Set<String> threeWindowHandles = Sets.newHashSet("w1", "w2", "w3");
+    when(mockDriver.getWindowHandles()).thenReturn(threeWindowHandles);
+
+    wait.until(numberOfWindowsToBe(2));
+
+    // then TimeoutException is thrown
+  }
+
+  @Test(expected = TimeoutException.class)
+  public void waitingNumberOfWindowsToBeThrowsTimeoutExceptionWhenGetWindowHandlesThrowsWebDriverException() {
+    when(mockDriver.getWindowHandles()).thenThrow(WebDriverException.class);
+
+    wait.until(numberOfWindowsToBe(2));
+
+    // then TimeoutException is thrown
   }
 
   interface GenericCondition extends ExpectedCondition<Object> {}

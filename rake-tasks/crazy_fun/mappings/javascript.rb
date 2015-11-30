@@ -572,7 +572,6 @@ module Javascript
         formatting = !args[:no_format].nil? ? "" : '--formatting=PRETTY_PRINT'
         flags.push(formatting)
 
-        flags.push('--third_party=true') unless !flags.index('--third_party=false').nil?
         flags.push("--js_output_file=#{output}")
 
         cmd = "" <<
@@ -845,7 +844,6 @@ module Javascript
             (ENV['pretty_print'] == 'true') ?  "--formatting=PRETTY_PRINT" : ""
 
         cmd = "" <<
-            "--third_party=false " <<
             "--js_output_file=#{output} " <<
             "--output_wrapper='#{wrapper}' " <<
             "--compilation_level=#{compilation_level(minify)} " <<
@@ -1342,7 +1340,7 @@ module Javascript
               ant.jvmarg(:line => "-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005")
             end
 
-            test_dir = File.join(dir, 'test')
+            test_dir = args[:test_dir] ? File.join(dir, args[:test_dir]) : File.join(dir, 'test')
             ant.sysproperty :key => 'js.test.dir', :value => test_dir
 
             if !args[:exclude].nil?

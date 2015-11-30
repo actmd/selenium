@@ -18,7 +18,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace OpenQA.Selenium.Remote
 {
@@ -30,7 +32,7 @@ namespace OpenQA.Selenium.Remote
         private RemoteWebDriver driver;
 
         /// <summary>
-        /// Initializes a new instance of the RemoteTargetLocator class
+        /// Initializes a new instance of the <see cref="RemoteTargetLocator"/> class
         /// </summary>
         /// <param name="driver">The driver that is currently in use</param>
         public RemoteTargetLocator(RemoteWebDriver driver)
@@ -38,7 +40,6 @@ namespace OpenQA.Selenium.Remote
             this.driver = driver;
         }
 
-        #region ITargetLocator members
         /// <summary>
         /// Move to a different frame using its index
         /// </summary>
@@ -64,10 +65,22 @@ namespace OpenQA.Selenium.Remote
                 throw new ArgumentNullException("frameName", "Frame name cannot be null");
             }
 
-            Dictionary<string, object> parameters = new Dictionary<string, object>();
-            parameters.Add("id", frameName);
-            this.driver.InternalExecute(DriverCommand.SwitchToFrame, parameters);
-            return this.driver;
+            // Dictionary<string, object> parameters = new Dictionary<string, object>();
+            // parameters.Add("id", frameName);
+            // this.driver.InternalExecute(DriverCommand.SwitchToFrame, parameters);
+            // return this.driver;
+            string name = Regex.Replace(frameName, @"(['""\\#.:;,!?+<>=~*^$|%&@`{}\-/\[\]\(\)])", @"\$1");
+            ReadOnlyCollection<IWebElement> frameElements = this.driver.FindElements(By.CssSelector("frame[name='" + name + "'],iframe[name='" + name + "']"));
+            if (frameElements.Count == 0)
+            {
+                frameElements = this.driver.FindElements(By.CssSelector("frame#" + name + ",iframe#" + name));
+                if (frameElements.Count == 0)
+                {
+                    throw new NoSuchFrameException("No frame element found with name or id " + frameName);
+                }
+            }
+
+            return this.Frame(frameElements[0]);
         }
 
         /// <summary>
@@ -112,18 +125,47 @@ namespace OpenQA.Selenium.Remote
         /// <summary>
         /// Change to the Window by passing in the name
         /// </summary>
-        /// <param name="windowName">name of the window that you wish to move to</param>
+        /// <param name="windowHandleOrName">Window handle or name of the window that you wish to move to</param>
         /// <returns>A WebDriver instance that is currently in use</returns>
-        public IWebDriver Window(string windowName)
+        public IWebDriver Window(string windowHandleOrName)
         {
             Dictionary<string, object> parameters = new Dictionary<string, object>();
-            parameters.Add("name", windowName);
+            if (this.driver.IsSpecificationCompliant)
+            {
+                parameters.Add("handle", windowHandleOrName);
+                try
+                {
+                    this.driver.InternalExecute(DriverCommand.SwitchToWindow, parameters);
+                    return this.driver;
+                }
+                catch (NoSuchWindowException)
+                {
+                    // simulate search by name
+                    string original = this.driver.CurrentWindowHandle;
+                    foreach (string handle in this.driver.WindowHandles)
+                    {
+                        this.Window(handle);
+                        if (windowHandleOrName == this.driver.ExecuteScript("return window.name").ToString())
+                        {
+                            return this.driver; // found by name
+                        }
+                    }
+
+                    this.Window(original);
+                    throw;
+                }
+            }
+            else
+            {
+                parameters.Add("name", windowHandleOrName);
+            }
+
             this.driver.InternalExecute(DriverCommand.SwitchToWindow, parameters);
             return this.driver;
         }
 
         /// <summary>
-        /// Change the active frame to the default 
+        /// Change the active frame to the default
         /// </summary>
         /// <returns>Element of the default</returns>
         public IWebDriver DefaultContent()
@@ -155,6 +197,5 @@ namespace OpenQA.Selenium.Remote
             this.driver.InternalExecute(DriverCommand.GetAlertText, null);
             return new RemoteAlert(this.driver);
         }
-        #endregion
     }
 }

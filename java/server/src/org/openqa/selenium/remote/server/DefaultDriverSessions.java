@@ -42,16 +42,17 @@ public class DefaultDriverSessions implements DriverSessions {
   private final Clock clock;
 
   private final Map<SessionId, Session> sessionIdToDriver =
-      new ConcurrentHashMap<SessionId, Session>();
+      new ConcurrentHashMap<>();
 
   private static List<DriverProvider> defaultDriverProviders =
     new ImmutableList.Builder<DriverProvider>()
+      .add(new FirefoxDriverProvider())
       .add(new DefaultDriverProvider(DesiredCapabilities.chrome(),
                                      "org.openqa.selenium.chrome.ChromeDriver"))
-      .add(new DefaultDriverProvider(DesiredCapabilities.firefox(),
-                                     "org.openqa.selenium.firefox.FirefoxDriver"))
       .add(new DefaultDriverProvider(DesiredCapabilities.internetExplorer(),
                                      "org.openqa.selenium.ie.InternetExplorerDriver"))
+      .add(new DefaultDriverProvider(DesiredCapabilities.edge(),
+                                     "org.openqa.selenium.edge.EdgeDriver"))
       .add(new DefaultDriverProvider(DesiredCapabilities.opera(),
                                      "com.opera.core.systems.OperaDriver"))
       .add(new DefaultDriverProvider(DesiredCapabilities.operaBlink(),

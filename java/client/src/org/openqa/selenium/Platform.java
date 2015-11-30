@@ -72,6 +72,13 @@ public enum Platform {
     }
   },
 
+  WIN10("windows 10", "win10") {
+    @Override
+    public Platform family() {
+      return WINDOWS;
+    }
+  },
+
   MAC("mac", "darwin", "os x") {},
 
   SNOW_LEOPARD("snow leopard", "os x 10.6") {
@@ -115,6 +122,17 @@ public enum Platform {
     @Override
     public String toString() {
       return "OS X 10.10";
+    }
+  },
+  
+  EL_CAPITAN("el capitan", "os x 10.11") {
+    @Override
+    public Platform family() {
+      return MAC;
+    }
+    @Override
+    public String toString() {
+      return "OS X 10.11";
     }
   },
 

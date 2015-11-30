@@ -17,6 +17,8 @@
 
 package org.openqa.selenium;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -25,11 +27,12 @@ import static org.openqa.selenium.testing.Ignore.Driver.MARIONETTE;
 import static org.openqa.selenium.testing.Ignore.Driver.PHANTOMJS;
 import static org.openqa.selenium.testing.Ignore.Driver.SAFARI;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Wait;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.testing.Ignore;
 import org.openqa.selenium.testing.JUnit4TestBase;
 import org.openqa.selenium.testing.JavascriptEnabled;
@@ -90,7 +93,6 @@ public class ImplicitWaitTest extends JUnit4TestBase {
 
   @Test
   @JavascriptEnabled
-  @Ignore(MARIONETTE)
   public void testShouldImplicitlyWaitUntilAtLeastOneElementIsFoundWhenSearchingForMany() {
     driver.get(pages.dynamicPage);
     WebElement add = driver.findElement(By.id("adder"));
@@ -154,5 +156,32 @@ public class ImplicitWaitTest extends JUnit4TestBase {
     } catch (ElementNotVisibleException e) {
       fail("Element should have been visible");
     }
+  }
+
+
+  @Test
+  @JavascriptEnabled
+  @Ignore({IE, PHANTOMJS, SAFARI, MARIONETTE})
+  public void testShouldRetainImplicitlyWaitFromTheReturnedWebDriverOfFrameSwitchTo() {
+    driver.manage().timeouts().implicitlyWait(1, SECONDS);
+    driver.get(pages.xhtmlTestPage);
+    driver.findElement(By.name("windowOne")).click();
+
+    Wait<WebDriver> wait = new WebDriverWait(driver, 1);
+    wait.until(ExpectedConditions.numberOfwindowsToBe(2));
+    String handle = (String)driver.getWindowHandles().toArray()[1];
+
+    WebDriver newWindow = driver.switchTo().window(handle);
+
+    long start = System.currentTimeMillis();
+
+    newWindow.findElements(By.id("this-crazy-thing-does-not-exist"));
+
+    long end = System.currentTimeMillis();
+
+    long time = end - start;
+
+    assertTrue(time >= 1000);
+
   }
 }

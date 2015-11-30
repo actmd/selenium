@@ -311,8 +311,7 @@ webdriver.WebDriver.executeCommand_ = function(executor, command) {
   return webdriver.WebDriver.toWireValue_(command.getParameters()).
       then(function(parameters) {
         command.setParameters(parameters);
-        return webdriver.promise.checkedNodeCall(
-            goog.bind(executor.execute, executor, command));
+        return executor.execute(command);
       });
 };
 
@@ -371,8 +370,7 @@ webdriver.WebDriver.prototype.schedule = function(command, description) {
     // execution.
     return prepCommand.then(function(parameters) {
       command.setParameters(parameters);
-      return webdriver.promise.checkedNodeCall(
-          goog.bind(executor.execute, executor, command));
+      return executor.execute(command);
     });
   }, description).then(function(response) {
     try {
@@ -602,7 +600,7 @@ webdriver.WebDriver.prototype.executeScript = function(script, var_args) {
  *         if (xhr.readyState == 4) {
  *           callback(xhr.responseText);
  *         }
- *       }
+ *       };
  *       xhr.send('');
  *     }).then(function(str) {
  *       console.log(JSON.parse(str)['food']);
@@ -667,7 +665,7 @@ webdriver.WebDriver.prototype.call = function(fn, opt_scope, var_args) {
  * *Example:* waiting up to 10 seconds for an element to be present and visible
  * on the page.
  *
- *     var button = driver.wait(until.elementLocated(By.id('foo'), 10000);
+ *     var button = driver.wait(until.elementLocated(By.id('foo')), 10000);
  *     button.click();
  *
  * This function may also be used to block the command flow on the resolution
@@ -2188,6 +2186,25 @@ webdriver.WebElement.prototype.isDisplayed = function() {
 
 
 /**
+ * Take a screenshot of the visible region encompassed by this element's
+ * bounding rectangle.
+ *
+ * @param {boolean=} opt_scroll Optional argument that indicates whether the
+ *     element should be scrolled into view before taking a screenshot. Defaults
+ *     to false.
+ * @return {!webdriver.promise.Promise.<string>} A promise that will be
+ *     resolved to the screenshot as a base-64 encoded PNG.
+ */
+webdriver.WebElement.prototype.takeScreenshot = function(opt_scroll) {
+  var scroll = !!opt_scroll;
+  return this.schedule_(
+      new webdriver.Command(webdriver.CommandName.TAKE_ELEMENT_SCREENSHOT)
+          .setParameter('scroll', scroll),
+      'WebElement.takeScreenshot(' + scroll + ')');
+};
+
+
+/**
  * Schedules a command to retrieve the outer HTML of this element.
  * @return {!webdriver.promise.Promise.<string>} A promise that will be
  *     resolved with the element's outer HTML.
@@ -2249,6 +2266,9 @@ webdriver.WebElementPromise = function(driver, el) {
 
   /** @override */
   this.then = goog.bind(el.then, el);
+
+  /** @override */
+  this.catch = goog.bind(el.catch, el);
 
   /** @override */
   this.thenCatch = goog.bind(el.thenCatch, el);
@@ -2372,6 +2392,9 @@ webdriver.AlertPromise = function(driver, alert) {
 
   /** @override */
   this.then = goog.bind(alert.then, alert);
+
+  /** @override */
+  this.catch = goog.bind(alert.catch, alert);
 
   /** @override */
   this.thenCatch = goog.bind(alert.thenCatch, alert);

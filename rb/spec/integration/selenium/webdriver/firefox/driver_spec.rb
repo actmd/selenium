@@ -17,24 +17,53 @@
 # specific language governing permissions and limitations
 # under the License.
 
+require_relative '../spec_helper'
+
 module Selenium
   module WebDriver
     module Firefox
 
-      describe Driver do
-        describe ".new" do
-          it "should take a Firefox::Profile instance as argument" do
-            begin
-              profile = Selenium::WebDriver::Firefox::Profile.new
-              driver = Selenium::WebDriver.for :firefox, :profile => profile
-            ensure
-              driver.quit if driver
+      compliant_on :browser => :firefox do
+        describe Driver do
+          describe ".new" do
+
+            it "should take a binary path as an argument" do
+              pending unless ENV['MARIONETTE_PATH']
+
+              begin
+                default_path = Firefox::Binary.path
+
+                driver1 = Selenium::WebDriver.for :firefox
+                default_version = driver1.capabilities[:version]
+                driver1.quit
+
+                caps = Remote::Capabilities.firefox(firefox_binary: ENV['MARIONETTE_PATH'])
+                driver2 = Selenium::WebDriver.for :firefox, :desired_capabilities => caps
+
+                expect(driver2.capabilities[:version]).to_not be == default_version
+                driver2.quit
+              ensure
+                Firefox::Binary.path = default_path
+              end
+            end
+
+            it "should take a Firefox::Profile instance as argument" do
+              begin
+                profile = Selenium::WebDriver::Firefox::Profile.new
+                driver = Selenium::WebDriver.for :firefox, :profile => profile
+                stored_profile = driver.instance_variable_get('@bridge').instance_variable_get('@launcher').instance_variable_get('@profile')
+                expect(stored_profile).to be == profile
+              ensure
+                driver.quit if driver
+              end
             end
           end
+
+          it_behaves_like "driver that can be started concurrently", :firefox
         end
+
       end
 
     end # Firefox
   end # WebDriver
 end # Selenium
-

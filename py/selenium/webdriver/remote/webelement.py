@@ -16,6 +16,7 @@
 # under the License.
 
 import hashlib
+from numbers import Number
 import os
 import zipfile
 try:
@@ -49,9 +50,15 @@ class WebElement(object):
     ``StaleElementReferenceException`` is thrown, and all future calls to this
     instance will fail."""
 
-    def __init__(self, parent, id_):
+    def __init__(self, parent, id_, w3c=False):
         self._parent = parent
         self._id = id_
+        self._w3c = w3c
+
+    def __repr__(self):
+        return '<{0.__module__}.{0.__name__} (session="{1}", element="{2}")>'.format(
+            type(self), self._parent.session_id, self._id)
+
 
     @property
     def tag_name(self):
@@ -311,7 +318,7 @@ class WebElement(object):
         for val in value:
             if isinstance(val, Keys):
                 typing.append(val)
-            elif isinstance(val, int):
+            elif isinstance(val, Number):
                 val = val.__str__()
                 for i in range(len(val)):
                     typing.append(val[i])
@@ -365,6 +372,48 @@ class WebElement(object):
         return self._execute(Command.GET_ELEMENT_RECT)['value']
 
     @property
+    def screenshot_as_base64(self):
+        """
+        Gets the screenshot of the current element as a base64 encoded string.
+
+        :Usage:
+            img_b64 = element.screenshot_as_base64
+        """
+        return self._execute(Command.ELEMENT_SCREENSHOT)['value']
+
+    @property
+    def screenshot_as_png(self):
+        """
+        Gets the screenshot of the current element as a binary data.
+
+        :Usage:
+            element_png = element.screenshot_as_png
+        """
+        return base64.b64decode(self.screenshot_as_base64.encode('ascii'))
+
+    def screenshot(self, filename):
+        """
+        Gets the screenshot of the current element. Returns False if there is
+           any IOError, else returns True. Use full paths in your filename.
+
+        :Args:
+         - filename: The full path you wish to save your screenshot to.
+
+        :Usage:
+            element.screenshot('/Screenshots/foo.png')
+        """
+        png = self.screenshot_as_png
+        try:
+            with open(filename, 'wb') as f:
+                f.write(png)
+        except IOError:
+            return False
+        finally:
+            del png
+        return True
+
+
+    @property
     def parent(self):
         """Internal reference to the WebDriver instance this element was found from."""
         return self._parent
@@ -383,7 +432,10 @@ class WebElement(object):
         return self._id
 
     def __eq__(self, element):
-        return self._id == element.id
+        return hasattr(element, 'id') and self._id == element.id
+
+    def __ne__(self, element):
+        return not self.__eq__(element)
 
     # Private Methods
     def _execute(self, command, params=None):
@@ -405,12 +457,38 @@ class WebElement(object):
         if not By.is_valid(by) or not isinstance(value, str):
             raise InvalidSelectorException("Invalid locator values passed in")
 
+        if self._w3c:
+            if by == By.ID:
+                by = By.CSS_SELECTOR
+                value = '[id="%s"]' % value
+            elif by == By.TAG_NAME:
+                by = By.CSS_SELECTOR
+            elif by == By.CLASS_NAME:
+                by = By.CSS_SELECTOR
+                value = ".%s" % value
+            elif by == By.NAME:
+                by = By.CSS_SELECTOR
+                value = '[name="%s"]' % value
+
         return self._execute(Command.FIND_CHILD_ELEMENT,
                              {"using": by, "value": value})['value']
 
     def find_elements(self, by=By.ID, value=None):
         if not By.is_valid(by) or not isinstance(value, str):
             raise InvalidSelectorException("Invalid locator values passed in")
+
+        if self._w3c:
+            if by == By.ID:
+                by = By.CSS_SELECTOR
+                value = '[id="%s"]' % value
+            elif by == By.TAG_NAME:
+                by = By.CSS_SELECTOR
+            elif by == By.CLASS_NAME:
+                by = By.CSS_SELECTOR
+                value = ".%s" % value
+            elif by == By.NAME:
+                by = By.CSS_SELECTOR
+                value = '[name="%s"]' % value
 
         return self._execute(Command.FIND_CHILD_ELEMENTS,
                              {"using": by, "value": value})['value']

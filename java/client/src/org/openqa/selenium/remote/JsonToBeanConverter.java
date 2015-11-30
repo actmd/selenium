@@ -112,6 +112,12 @@ public class JsonToBeanConverter {
                         ? (JsonObject) source
                         : new JsonParser().parse((String) source).getAsJsonObject();
 
+      if (json.has("error") && ! json.get("error").isJsonNull()) {
+        String state = json.get("error").getAsString();
+        response.setState(state);
+        response.setStatus(ErrorCodes.toStatus(state));
+        response.setValue(convert(Object.class, json.get("message")));
+      }
       if (json.has("state") && ! json.get("state").isJsonNull()) {
         String state = json.get("state").getAsString();
         response.setState(state);
@@ -133,7 +139,11 @@ public class JsonToBeanConverter {
         response.setSessionId(json.get("sessionId").getAsString());
       }
 
-      response.setValue(convert(Object.class, json.get("value")));
+      if (json.has("value")) {
+        response.setValue(convert(Object.class, json.get("value")));
+      } else {
+        response.setValue(convert(Object.class, json));
+      }
 
       return (T) response;
     }
@@ -326,9 +336,8 @@ public class JsonToBeanConverter {
         cause);
   }
 
-  @SuppressWarnings("unchecked")
-  private Map convertMap(JsonObject toConvert, int depth) {
-    Map map = new HashMap();
+  private Map<String, Object> convertMap(JsonObject toConvert, int depth) {
+    Map<String, Object> map = new HashMap<>();
 
     for (Map.Entry<String, JsonElement> entry : toConvert.entrySet()) {
       map.put(entry.getKey(), convert(Object.class, entry.getValue(), depth + 1));
@@ -337,9 +346,8 @@ public class JsonToBeanConverter {
     return map;
   }
 
-  @SuppressWarnings("unchecked")
-  private List convertList(JsonArray toConvert, int depth) {
-    ArrayList list = new ArrayList(toConvert.size());
+  private List<?> convertList(JsonArray toConvert, int depth) {
+    List<Object> list = new ArrayList<>(toConvert.size());
     for (int i = 0; i < toConvert.size(); i++) {
       list.add(convert(Object.class, toConvert.get(i), depth + 1));
     }

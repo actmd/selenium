@@ -98,6 +98,9 @@
     <ClCompile Include="BrowserCookie.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FileUtilities.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Browser.h">
@@ -295,9 +298,6 @@
     <ClInclude Include="Generated\atoms.h">
       <Filter>Header Files\Generated</Filter>
     </ClInclude>
-    <ClInclude Include="Generated\cookies.h">
-      <Filter>Header Files\Generated</Filter>
-    </ClInclude>
     <ClInclude Include="Generated\sizzle.h">
       <Filter>Header Files\Generated</Filter>
     </ClInclude>
@@ -377,6 +377,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BrowserCookie.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandHandlers\SetAlertCredentialsCommandHandler.h">
+      <Filter>Header Files\CommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="FileUtilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

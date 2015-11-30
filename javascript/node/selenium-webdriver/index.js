@@ -20,7 +20,7 @@
  * public API and provides convenience assessors to certain sub-modules.
  */
 
-var base = require('./_base');
+var base = require('./lib/_base');
 var builder = require('./builder');
 var error = require('./error');
 
@@ -38,8 +38,7 @@ exports.ActionSequence = base.require('webdriver.ActionSequence');
 exports.Builder = builder.Builder;
 
 
-/** @type {webdriver.By.} */
-exports.By = base.require('webdriver.By');
+exports.By = require('./lib/by').By;
 
 
 /** @type {function(new: webdriver.Capabilities)} */

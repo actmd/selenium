@@ -21,10 +21,12 @@ import org.junit.Test;
 import org.openqa.selenium.testing.Ignore;
 import org.openqa.selenium.testing.JUnit4TestBase;
 import org.openqa.selenium.testing.JavascriptEnabled;
+import org.openqa.selenium.testing.TestUtilities;
 
 import java.util.List;
 
 import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
@@ -35,6 +37,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeFalse;
 import static org.openqa.selenium.testing.Ignore.Driver.IE;
 import static org.openqa.selenium.testing.Ignore.Driver.MARIONETTE;
 
@@ -225,6 +228,15 @@ public class ElementAttributeTest extends JUnit4TestBase {
   }
 
   @Test
+  public void testShouldReturnInnerHtml() {
+    assumeFalse("IE before 10 returns innerHTML with uppercase tag names", TestUtilities.getIEVersion(driver) < 10);
+    driver.get(pages.simpleTestPage);
+
+    String html = driver.findElement(By.id("wrappingtext")).getAttribute("innerHTML");
+    assertThat(html, containsString("<tbody>"));
+  }
+
+  @Test
   public void testShouldTreatReadonlyAsAValue() {
     driver.get(pages.formPage);
 
@@ -237,6 +249,18 @@ public class ElementAttributeTest extends JUnit4TestBase {
     String notReadonly = textInput.getAttribute("readonly");
 
     assertFalse(readonly.equals(notReadonly));
+  }
+
+  @Test
+  public void testShouldReturnHiddenTextForTextContentAttribute() {
+    assumeFalse("IE before 9 doesn't handle textContent attribute", TestUtilities.isOldIe(driver));
+
+    driver.get(pages.simpleTestPage);
+
+    WebElement element = driver.findElement(By.id("hiddenline"));
+    String textContent = element.getAttribute("textContent");
+
+    assertEquals(textContent, "A hidden line of text");
   }
 
   @Test
@@ -294,9 +318,10 @@ public class ElementAttributeTest extends JUnit4TestBase {
     assertEquals(null, mousedownDiv.getAttribute("onclick"));
   }
 
-  @Ignore(value = {IE}, reason = "IE7 Does not support SVG")
   @Test
   public void testGetAttributeDoesNotReturnAnObjectForSvgProperties() {
+    assumeFalse("IE before 9 doesn't support SVG", TestUtilities.isOldIe(driver));
+
     driver.get(pages.svgPage);
     WebElement svgElement = driver.findElement(By.id("rotate"));
     assertEquals("rotate(30)", svgElement.getAttribute("transform"));

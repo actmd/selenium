@@ -55,7 +55,8 @@ module Selenium
         def driver_extensions
           [
             DriverExtensions::TakesScreenshot,
-            DriverExtensions::HasInputDevices
+            DriverExtensions::HasInputDevices,
+            DriverExtensions::HasWebStorage
           ]
         end
 
@@ -102,7 +103,6 @@ module Selenium
             chrome_options.merge! 'profile'    => data['zip'],
                                   'extensions' => data['extensions']
           end
-
 
           chrome_options['binary']                   = Chrome.path if Chrome.path
           chrome_options['nativeEvents']             = true if native_events

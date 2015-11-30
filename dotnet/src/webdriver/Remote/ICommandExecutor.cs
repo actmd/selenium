@@ -16,6 +16,8 @@
 // limitations under the License.
 // </copyright>
 
+using System;
+
 namespace OpenQA.Selenium.Remote
 {
     /// <summary>
@@ -23,6 +25,11 @@ namespace OpenQA.Selenium.Remote
     /// </summary>
     public interface ICommandExecutor
     {
+        /// <summary>
+        /// Gets the repository of objects containin information about commands.
+        /// </summary>
+        CommandInfoRepository CommandInfoRepository { get; }
+
         /// <summary>
         /// Executes a command
         /// </summary>

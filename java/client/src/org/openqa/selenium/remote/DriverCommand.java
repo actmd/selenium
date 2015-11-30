@@ -40,6 +40,7 @@ public interface DriverCommand {
 
   String ADD_COOKIE = "addCookie";
   String GET_ALL_COOKIES = "getCookies";
+  String GET_COOKIE = "getCookie";
   String DELETE_COOKIE = "deleteCookie";
   String DELETE_ALL_COOKIES = "deleteAllCookies";
 
@@ -57,6 +58,8 @@ public interface DriverCommand {
 
   String GET_CURRENT_WINDOW_HANDLE = "getCurrentWindowHandle";
   String GET_WINDOW_HANDLES = "getWindowHandles";
+  String GET_WINDOW_HANDLES_W3C = "getWindowHandlesW3C";
+  String GET_CURRENT_WINDOW_HANDLE_W3C = "getCurrentWindowHandleW3C";
 
   String GET_CURRENT_CONTEXT_HANDLE = "getCurrentContextHandle";
   String GET_CONTEXT_HANDLES = "getContextHandles";
@@ -73,12 +76,15 @@ public interface DriverCommand {
 
   String EXECUTE_SCRIPT = "executeScript";
   String EXECUTE_ASYNC_SCRIPT = "executeAsyncScript";
+  String EXECUTE_SCRIPT_W3C = "executeScriptW3C";
+  String EXECUTE_ASYNC_SCRIPT_W3C = "executeAsyncScriptW3C";
 
   String GET_ELEMENT_TEXT = "getElementText";
   String GET_ELEMENT_TAG_NAME = "getElementTagName";
   String IS_ELEMENT_SELECTED = "isElementSelected";
   String IS_ELEMENT_ENABLED = "isElementEnabled";
   String IS_ELEMENT_DISPLAYED = "isElementDisplayed";
+  String GET_ELEMENT_RECT = "getElementRect";
   String GET_ELEMENT_LOCATION = "getElementLocation";
   String GET_ELEMENT_LOCATION_ONCE_SCROLLED_INTO_VIEW = "getElementLocationOnceScrolledIntoView";
   String GET_ELEMENT_SIZE = "getElementSize";
@@ -87,11 +93,18 @@ public interface DriverCommand {
   String ELEMENT_EQUALS = "elementEquals";
 
   String SCREENSHOT = "screenshot";
+  String ELEMENT_SCREENSHOT = "elementScreenshot";
 
   String ACCEPT_ALERT = "acceptAlert";
   String DISMISS_ALERT = "dismissAlert";
   String GET_ALERT_TEXT = "getAlertText";
   String SET_ALERT_VALUE = "setAlertValue";
+  String SET_ALERT_CREDENTIALS = "setAlertCredentials";
+
+  String ACCEPT_ALERT_W3C = "acceptAlertW3C";
+  String DISMISS_ALERT_W3C = "dimissAlertW3C";
+  String GET_ALERT_TEXT_W3C = "getAlertTextW3C";
+  String SET_ALERT_VALUE_W3C = "setAlertValueW3C";
 
   String SET_TIMEOUT = "setTimeout";
   String IMPLICITLY_WAIT = "implicitlyWait";
@@ -150,12 +163,18 @@ public interface DriverCommand {
   String TOUCH_LONG_PRESS = "touchLongPress";
   String TOUCH_FLICK = "touchFlick";
 
-  // Window API (beta)
+  // Window API
   String SET_WINDOW_SIZE = "setWindowSize";
   String SET_WINDOW_POSITION = "setWindowPosition";
   String GET_WINDOW_SIZE = "getWindowSize";
   String GET_WINDOW_POSITION = "getWindowPosition";
   String MAXIMIZE_WINDOW = "maximizeWindow";
+
+  // W3C compatible Window API
+  String SET_CURRENT_WINDOW_SIZE = "setCurrentWindowSize";
+  String GET_CURRENT_WINDOW_SIZE = "getCurrentWindowSize";
+  String MAXIMIZE_CURRENT_WINDOW = "maximizeCurrentWindow";
+  String FULLSCREEN_CURRENT_WINDOW = "fullscreenCurrentWindow";
 
   // Logging API
   String GET_AVAILABLE_LOG_TYPES = "getAvailableLogTypes";

@@ -22,7 +22,9 @@ import static org.junit.Assert.assertEquals;
 import com.thoughtworks.selenium.DefaultSelenium;
 import com.thoughtworks.selenium.Selenium;
 
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -36,19 +38,19 @@ import org.openqa.grid.web.Hub;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.server.SeleniumServer;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 
 public class SmokeTest {
 
-  private static Hub hub;
+  private Hub hub;
 
-  @BeforeClass
-  public static void prepare() throws Exception {
+  @Before
+  public void prepare() throws Exception {
 
     hub = GridTestHelper.getHub();
-
 
     SelfRegisteringRemote remote =
         GridTestHelper.getRemoteWithoutCapabilities(hub.getUrl(), GridRole.NODE);
@@ -60,6 +62,7 @@ public class SmokeTest {
 
     remote.addBrowser(firefoxOnSeleniumCapability, 1);
 
+    remote.setRemoteServer(new SeleniumServer(remote.getConfiguration()));
     remote.startRemoteServer();
 
     remote.getConfiguration().put(RegistrationRequest.TIME_OUT, -1);
@@ -102,8 +105,8 @@ public class SmokeTest {
     }
   }
 
-  @AfterClass
-  public static void stop() throws Exception {
+  @After
+  public void stop() throws Exception {
     hub.stop();
   }
 }

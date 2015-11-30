@@ -17,13 +17,15 @@
 # specific language governing permissions and limitations
 # under the License.
 
-require File.expand_path("../spec_helper", __FILE__)
+require_relative 'spec_helper'
 
 module Selenium
   module WebDriver
-    describe Mouse do
 
-      not_compliant_on :browser => [:android, :iphone, :safari] do
+    # Marionette BUG - Interactions Not Supported
+    not_compliant_on :browser => [:android, :iphone, :safari, :marionette] do
+      describe Mouse do
+
         it "clicks an element" do
           driver.navigate.to url_for("formPage.html")
           driver.mouse.click driver.find_element(:id, "imageButton")
@@ -38,23 +40,26 @@ module Selenium
 
           droppable = driver.find_element(:id => "droppable")
 
-          driver.mouse.down    draggable
+          driver.mouse.down draggable
           driver.mouse.move_to droppable
-          driver.mouse.up      droppable
+          driver.mouse.up droppable
 
           text = droppable.find_element(:tag_name => "p").text
-          text.should == "Dropped!"
+          expect(text).to eq("Dropped!")
         end
 
-        it "double clicks an element" do
-          driver.navigate.to url_for("javascriptPage.html")
-          element = driver.find_element(:id, 'doubleClickField')
+        # Edge BUG - https://connect.microsoft.com/IE/feedback/details/1850023
+        not_compliant_on :browser => :edge do
+          it "double clicks an element" do
+            driver.navigate.to url_for("javascriptPage.html")
+            element = driver.find_element(:id, 'doubleClickField')
 
-          driver.mouse.double_click element
+            driver.mouse.double_click element
 
-          wait(5).until {
-            element.attribute(:value) == 'DoubleClicked'
-          }
+            wait(5).until {
+              element.attribute(:value) == 'DoubleClicked'
+            }
+          end
         end
 
         not_compliant_on :browser => :phantomjs do
@@ -70,7 +75,6 @@ module Selenium
           end
         end
       end
-
     end
   end
 end

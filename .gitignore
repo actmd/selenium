@@ -28,8 +28,6 @@ cpp/iedriver/Generated/atoms.h
 cpp/iedriver/sizzle.h
 chromedriver.log
 junit*.properties
-WebDriver.suo
-WebDriver.sln.cache
 *.rbc
 .rbx
 .yardoc
@@ -38,8 +36,12 @@ rb/.yardoc
 maven/*/src
 maven/target
 maven/*/target
+maven/.idea
+maven/*.iml
+maven/*/*.iml
 java/client/build/
 java/client/log.txt
+java/client/iedriver.log
 java/server/build/
 *.pyc
 dist/
@@ -49,16 +51,19 @@ py/selenium/webdriver/firefox/webdriver_prefs.json
 py/selenium/webdriver/firefox/x86/
 py/docs/build/
 selenium.egg-info/
+third_party/java/jetty/jetty-repacked.jar
 *.user
 *.cache
 obj/
 *.opensdf
 *.suo
 *.sdf
+*.vs
 Generated/
 ipch/
 /iedriver.log
 /phantomjsdriver.log
+geckodriver.log
 .tags
 .ruby-version
 GPATH
@@ -71,3 +76,4 @@ Gemfile.lock
 .idea/sonarIssues.xml
 .idea/inspectionProfiles/profiles_settings.xml
 .idea/inspectionProfiles/Project_Default.xml
+.idea/misc.xml

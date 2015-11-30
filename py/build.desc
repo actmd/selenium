@@ -19,6 +19,11 @@ py_test(
   browsers = [ "ff" ])
 
 py_test(
+  name = "marionette_test",
+  deps = [ ":test_ff" ],
+  browsers = [ "marionette" ])
+
+py_test(
   name = "phantomjs_test",
   gd_specific_tests = [ "test/selenium/webdriver/phantomjs/*_tests.py" ],
   deps = [ ":test_phantomjs" ],
@@ -39,6 +44,11 @@ py_test(
   name = "ie_test",
   deps = [ ":test_ie" ],
   browsers = [ "ie" ])
+
+py_test(
+  name = "edge_test",
+  deps = [":test_edge"],
+  browsers = [ "edge"])
 
 py_test(
   name = "remote_firefox_test",
@@ -68,7 +78,9 @@ py_test(
   browsers = [
     "chrome",
     "ff",
+    "marionette",
     "ie",
+    "edge",
     "blackberry",
     "phantomjs",
     "remote_firefox",

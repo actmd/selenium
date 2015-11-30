@@ -1,3 +1,63 @@
+v2.48.2
+=======
+ * Release containing fix to Firefox driver bug when clearing input fields of
+   type number.
+
+v2.48.1
+=======
+ * Various updates in communicating with remote ends using the W3C dialect of
+   the JSON wire protocol.
+ * (on behalf of petruc) Added HTML5 functionality to .NET bindings. The .NET
+   bindings now include the ability to access appCache status, local and
+   session storage, and geolocation. Each feature has a role-based marker
+   interface (IHasApplicationCache, IHasWebStorage, or IHasLocationContext),
+   and the implementation has a boolean property to query if the driver
+   supports that feature. Attempting to use the feature for a driver which
+   does not support it will throw an exception.
+ * Issue #1120: Fixed deserialization of date-time data from remote ends.
+ * Issue #1186: Safari should only specify MAC as platform in default desired
+   capabilities.
+
+v2.48.0
+=======
+ * Supports native events for Firefox version 31 (immediately previous ESR).
+   Native event support has been discontinued for versions of Firefox later
+   than 33. Synthetic events tested on Firefox versions 31 (immediately
+   previous ESR), 38 (current ESR), and 40 (immediately previous release),
+   and 41 (current release).
+ * Refactored JSON deserialization for responses.
+ * Modified SwitchTo().Frame(string) to use client-side code instead of a
+   direct wire protocol call.
+ * Added support for the W3C Specification dialect of the JSON wire protocol
+ * Added initial support for Mozilla's Marionette implementation of the
+   Firefox driver.
+
+v2.47.0
+=======
+ * Supports native events for Firefox version 31 (immediately previous ESR).
+   Native event support has been discontinued for versions of Firefox later
+   than 33. Synthetic events tested on Firefox versions 31 (immediately
+   previous ESR), 38 (immediately previous release and current ESR), and 39
+   (current release).
+ * (provided by Microsoft) Added language bindings for Microsoft Edge browser.
+ * Added support for authentication dialogs in the .NET bindings.
+ * Replaced DotNetZip with ZipStorer library. Adds the ability to use the .NET
+   bindings with Firefox on Linux and OS X via Mono. The replacement library
+   uses the internal System.IO.Compression classes along with custom code for
+   reading and writing the central director structure of .zip files. The
+   resulting .zip files created may be slightly larger than those produced via
+   DotNetZip, but we will sacrifice that small size difference in exchange for
+   cross-platform usability.
+ * Fixing cookie parsing error in .NET bindings. The JSON response for cookie
+   expiration date is a number, not an integer. The .NET bindings were not
+   handling the fact that a floating point number could be included in the JSON
+   object as an expiration time.
+ * Added support to .NET bindings for HTTP-only cookies.
+ * Added ITakesScreenshot to .NET RemoteWebElement for spec compatibility Note
+   that no driver implements this at present, so attempting to use this within
+   any test will result in a NotImplementedException.
+ * Fixed dynamic assembly generation for .NET PageFactory for .NET 3.5.
+
 v2.46.0
 =======
  * Supports native events for Firefox version 31 (immediately previous ESR).

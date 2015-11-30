@@ -33,7 +33,6 @@ import org.openqa.jetty.util.StringUtil;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.io.TemporaryFilesystem;
 import org.openqa.selenium.remote.SessionId;
-import org.openqa.selenium.remote.server.DriverSessions;
 import org.openqa.selenium.remote.server.log.LoggingManager;
 import org.openqa.selenium.remote.server.log.PerSessionLogHandler;
 import org.openqa.selenium.server.BrowserSessionFactory.BrowserSessionInfo;
@@ -76,7 +75,7 @@ import java.util.logging.Logger;
 
 /**
  * A Jetty handler that takes care of remote Selenium requests.
- * <p/>
+ * <p>
  * Remote Selenium requests are described in detail in the class description for
  * <code>SeleniumServer</code>
  *
@@ -91,15 +90,15 @@ public class SeleniumDriverResourceHandler extends ResourceHandler {
       LogFactory.getLog(SeleniumDriverResourceHandler.class.getName() + ".browserSideLog");
 
   private SeleniumServer remoteControl;
-  private Map<String, String> domainsBySessionId = new HashMap<String, String>();
+  private Map<String, String> domainsBySessionId = new HashMap<>();
   private StringBuffer logMessagesBuffer = new StringBuffer();
 
   private BrowserLauncherFactory browserLauncherFactory;
   private final BrowserSessionFactory browserSessionFactory;
 
   public SeleniumDriverResourceHandler(
-      SeleniumServer remoteControl, DriverSessions webdriverSessions) {
-    browserLauncherFactory = new BrowserLauncherFactory(webdriverSessions);
+      SeleniumServer remoteControl, BrowserLauncherFactory browserLauncherFactory) {
+    this.browserLauncherFactory = browserLauncherFactory;
     browserSessionFactory = new BrowserSessionFactory(browserLauncherFactory);
     this.remoteControl = remoteControl;
   }
@@ -259,9 +258,9 @@ public class SeleniumDriverResourceHandler extends ResourceHandler {
   /**
    * extract the posted data from an incoming request, stripping away a piggybacked data
    *
-   * @param req
-   * @param sessionId
-   * @param uniqueId
+   * @param req request
+   * @param sessionId session id
+   * @param uniqueId unique id
    * @return a string containing the posted data (with piggybacked log info stripped)
    * @throws IOException
    */
@@ -863,7 +862,7 @@ public class SeleniumDriverResourceHandler extends ResourceHandler {
 
   /**
    * Registers the given browser session among the active sessions to handle.
-   * <p/>
+   * <p>
    * Usually externally created browser sessions are managed themselves, but registering them allows
    * the shutdown procedures to be simpler.
    *
@@ -875,7 +874,7 @@ public class SeleniumDriverResourceHandler extends ResourceHandler {
 
   /**
    * De-registers the given browser session from among the active sessions.
-   * <p/>
+   * <p>
    * When an externally managed but registered session is closed, this method should be called to
    * keep the set of active sessions up to date.
    *

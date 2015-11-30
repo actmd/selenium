@@ -17,79 +17,105 @@
 # specific language governing permissions and limitations
 # under the License.
 
-require File.expand_path("../spec_helper", __FILE__)
+require_relative 'spec_helper'
 
 module Selenium
   module WebDriver
+
     describe Options do
 
-      describe 'logs' do
-        compliant_on :driver => [:firefox] do
-          it 'can fetch available log types' do
-            driver.manage.logs.available_types.should == [:browser, :driver]
+      not_compliant_on :browser => [:marionette, :ie, :edge] do
+        describe 'logs' do
+
+          compliant_on :driver => :remote do
+            it 'can fetch remote log types' do
+              expect(driver.manage.logs.available_types).to include(:server, :client)
+            end
           end
 
-          it 'can get the browser log' do
-            driver.navigate.to url_for("simpleTest.html")
-
-            entries = driver.manage.logs.get(:browser)
-            entries.should_not be_empty
-            entries.first.should be_kind_of(LogEntry)
+          # Phantomjs Returns har instead of driver
+          not_compliant_on :browser => :phantomjs do
+            it 'can fetch available log types' do
+              expect(driver.manage.logs.available_types).to include(:browser, :driver)
+            end
           end
 
-          it 'can get the driver log' do
-            driver.navigate.to url_for("simpleTest.html")
+          # All other browsers show empty
+          compliant_on :browser => :firefox do
+            it 'can get the browser log' do
+              driver.navigate.to url_for("simpleTest.html")
 
-            entries = driver.manage.logs.get(:driver)
-            entries.should_not be_empty
-            entries.first.should be_kind_of(LogEntry)
+              entries = driver.manage.logs.get(:browser)
+              expect(entries).not_to be_empty
+              expect(entries.first).to be_kind_of(LogEntry)
+            end
+          end
+
+          # Phantomjs Returns har instead of driver
+          not_compliant_on :browser => :phantomjs do
+            it 'can get the driver log' do
+              driver.navigate.to url_for("simpleTest.html")
+
+              entries = driver.manage.logs.get(:driver)
+              expect(entries).not_to be_empty
+              expect(entries.first).to be_kind_of(LogEntry)
+            end
           end
         end
       end
 
-      describe "cookie management" do
-        it "should get all" do
-          driver.navigate.to url_for("xhtmlTest.html")
-          driver.manage.add_cookie :name => "foo", :value => "bar"
+      not_compliant_on :browser => :marionette do
+        describe "cookie management" do
 
-          cookies = driver.manage.all_cookies
-
-          expect(cookies.size).to eq(1)
-          cookies.first[:name].should == "foo"
-          cookies.first[:value].should == "bar"
-        end
-
-        it "should delete one" do
-          driver.navigate.to url_for("xhtmlTest.html")
-
-          driver.manage.add_cookie :name => "foo", :value => "bar"
-          driver.manage.delete_cookie("foo")
-        end
-
-        it "should delete all" do
-          driver.navigate.to url_for("xhtmlTest.html")
-
-          driver.manage.add_cookie :name => "foo", :value => "bar"
-          driver.manage.delete_all_cookies
-          driver.manage.all_cookies.should be_empty
-        end
-
-        not_compliant_on :browser => [:ie, :android, :iphone, :safari] do
-          it "should use DateTime for expires" do
+          it "should get all" do
             driver.navigate.to url_for("xhtmlTest.html")
+            driver.manage.add_cookie :name => "foo", :value => "bar"
 
-            expected = DateTime.new(2039)
-            driver.manage.add_cookie :name => "foo",
-                                     :value   => "bar",
-                                     :expires => expected
+            cookies = driver.manage.all_cookies
 
-            actual = driver.manage.cookie_named("foo")[:expires]
-            actual.should be_kind_of(DateTime)
-            actual.should == expected
+            expect(cookies.size).to eq(1)
+            expect(cookies.first[:name]).to eq("foo")
+            expect(cookies.first[:value]).to eq("bar")
+          end
+
+          # Edge BUG - https://connect.microsoft.com/IE/feedbackdetail/view/1864122
+          not_compliant_on :browser => :edge do
+            it "should delete one" do
+              driver.navigate.to url_for("xhtmlTest.html")
+              driver.manage.add_cookie :name => "foo", :value => "bar"
+
+              driver.manage.delete_cookie("foo")
+            end
+          end
+
+          # This is not a w3c supported spec
+          not_compliant_on :browser => :edge do
+            it "should delete all" do
+              driver.navigate.to url_for("xhtmlTest.html")
+
+              driver.manage.add_cookie :name => "foo", :value => "bar"
+              driver.manage.delete_all_cookies
+              expect(driver.manage.all_cookies).to be_empty
+            end
+          end
+
+          # Marionette BUG - Failed to convert expiry to Date
+          not_compliant_on :browser => [:android, :iphone, :safari, :marionette] do
+            it "should use DateTime for expires" do
+              driver.navigate.to url_for("xhtmlTest.html")
+
+              expected = DateTime.new(2039)
+              driver.manage.add_cookie :name => "foo",
+                                       :value => "bar",
+                                       :expires => expected
+
+              actual = driver.manage.cookie_named("foo")[:expires]
+              expect(actual).to be_kind_of(DateTime)
+              expect(actual).to eq(expected)
+            end
           end
         end
       end
-
     end
   end
 end

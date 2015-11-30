@@ -50,7 +50,7 @@ end
 verbose($DEBUG)
 
 def version
-  "2.46.0"
+  "2.48.2"
 end
 ide_version = "2.8.0"
 
@@ -109,7 +109,6 @@ task :tests => [
   "//java/client/test/org/openqa/selenium/htmlunit:test_basic",
   "//java/client/test/org/openqa/selenium/htmlunit:test_js",
   "//java/client/test/org/openqa/selenium/firefox:test_synthesized",
-  "//java/client/test/org/openqa/selenium/firefox:test_native",
   "//java/client/test/org/openqa/selenium/ie:test",
   "//java/client/test/org/openqa/selenium/chrome:test",
   "//java/client/test/org/openqa/selenium/opera:test_blink",
@@ -126,7 +125,13 @@ task :common_core => [ "//common:core" ]
 task :grid => [ "//java/server/src/org/openqa/grid/selenium" ]
 task :htmlunit => [ "//java/client/src/org/openqa/selenium/htmlunit" ]
 task :ie => [ "//java/client/src/org/openqa/selenium/ie" ]
-task :firefox => [ "//java/client/src/org/openqa/selenium/firefox" ]
+task :firefox => [
+  "//cpp:noblur",
+  "//cpp:noblur64",
+  "//cpp:imehandler",
+  "//cpp:imehandler64",
+  "//java/client/src/org/openqa/selenium/firefox"
+]
 task :'debug-server' => "//java/client/test/org/openqa/selenium/environment/webserver:WebServer:run"
 task :remote => [:remote_common, :remote_server, :remote_client]
 task :remote_common => ["//java/client/src/org/openqa/selenium/remote:common"]
@@ -146,6 +151,8 @@ task :support => [
 desc 'Build the standalone server'
 task 'selenium-server-standalone' => '//java/server/src/org/openqa/grid/selenium:selenium:uber'
 
+task 'selenium-server-standalone-v3' => '//java/server/src/org/openqa/grid/selenium:selenium-v3:uber'
+
 task :ide => [ "//ide:selenium-ide-multi" ]
 task :ide_proxy_setup => [ "//javascript/selenium-atoms", "se_ide:setup_proxy" ]
 task :ide_proxy_remove => [ "se_ide:remove_proxy" ]
@@ -154,6 +161,7 @@ task :ide_bamboo => ["se_ide:assemble_ide_in_bamboo"]
 task :test_javascript => [
   '//javascript/atoms:test:run',
   '//javascript/webdriver:test:run',
+  '//javascript/webdriver:es6_test:run',
   '//javascript/selenium-atoms:test:run',
   '//javascript/selenium-core:test:run']
 task :test_chrome => [ "//java/client/test/org/openqa/selenium/chrome:test:run" ]
@@ -173,7 +181,6 @@ task :test_grid => [
 task :test_ie => [ "//java/client/test/org/openqa/selenium/ie:test:run" ]
 task :test_jobbie => [ :test_ie ]
 task :test_firefox => [ "//java/client/test/org/openqa/selenium/firefox:test_synthesized:run" ]
-task :test_firefox_native => [ "//java/client/test/org/openqa/selenium/firefox:test_native:run" ]
 task :test_opera => [ "//java/client/test/org/openqa/selenium/opera:test_blink:run" ]
 task :test_remote_server => [ '//java/server/test/org/openqa/selenium/remote/server:small-tests:run' ]
 task :test_remote => [
@@ -242,13 +249,21 @@ task :test_java => [
 task :test_rb => [
   "//rb:unit-test",
   "//rb:rc-client-unit-test",
-  "//rb:firefox-test",
-  "//rb:remote-test",
   "//rb:rc-client-integration-test",
- ("//rb:ie-test" if windows?),
   "//rb:chrome-test",
-  "//rb:safari-test",
-  "//rb:phantomjs-test"
+  "//rb:firefox-test",
+  "//rb:phantomjs-test",
+  "//rb:remote-chrome-test",
+  "//rb:remote-firefox-test",
+  "//rb:remote-phantomjs-test",
+  ("//rb:marionette-test" if ENV['MARIONETTE_PATH']),
+  ("//rb:remote-marionette-test" if ENV['MARIONETTE_PATH']),
+  ("//rb:safari-test" if mac?),
+  ("//rb:remote-safari-test" if mac?),
+  ("//rb:ie-test" if windows?),
+  ("//rb:remote-ie-test" if windows?),
+  ("//rb:edge-test" if windows?),
+  ("//rb:remote-edge-test" if windows?)
 ].compact
 
 task :test_py => [ :py_prep_for_install_release, "//py:firefox_test:run" ]
@@ -265,7 +280,7 @@ if (python?)
   task :test => [ :test_py ]
 end
 
-task :build => [:all, :remote, :selenium, :tests]
+task :build => [:all, :firefox, :remote, :selenium, :tests]
 
 desc 'Clean build artifacts.'
 task :clean do
@@ -374,6 +389,9 @@ task :javadocs => [:common, :firefox, :htmlunit, :ie, :remote, :support, :chrome
    [File.join(%w(java client src))].each do |m|
      sourcepath += File::PATH_SEPARATOR + m
    end
+   [File.join(%w(java server src))].each do |m|
+     sourcepath += File::PATH_SEPARATOR + m
+   end
    p sourcepath
    cmd = "javadoc -notimestamp -d build/javadoc -sourcepath #{sourcepath} -classpath #{classpath} -subpackages org.openqa.selenium -subpackages com.thoughtworks "
    cmd << " -exclude org.openqa.selenium.internal.selenesedriver:org.openqa.selenium.internal.seleniumemulation:org.openqa.selenium.remote.internal"
@@ -398,6 +416,7 @@ task :py_install =>  "//py:install"
 task :py_release => :py_prep_for_install_release do
     sh "grep -v test setup.py > setup_release.py; mv setup_release.py setup.py"
     sh "python setup.py sdist upload"
+    sh "python setup.py bdist_wheel upload"
     sh "git checkout setup.py"
 end
 
@@ -457,14 +476,58 @@ desc "Calculate dependencies required for testing the automation atoms"
 task :calcdeps => "build/javascript/deps.js"
 
 task :test_webdriverjs => [
-  "//javascript/webdriver:test:run"
+  "//javascript/webdriver:es6_test:run"
 ]
 
 desc "Generate a single file with WebDriverJS' public API"
 task :webdriverjs => [ "//javascript/webdriver:webdriver" ]
 
+desc "Repack jetty"
+task "repack-jetty" => "build/third_party/java/jetty/jetty-repacked.jar"
+
+# Expose the repack task to CrazyFun.
+task "//third_party/java/jetty:repacked" => "build/third_party/java/jetty/jetty-repacked.jar"
+
+file "build/third_party/java/jetty/jetty-repacked.jar" => [
+   "third_party/java/jetty/jetty-continuation-9.2.13.v20150730.jar",
+   "third_party/java/jetty/jetty-http-9.2.13.v20150730.jar",
+   "third_party/java/jetty/jetty-io-9.2.13.v20150730.jar",
+   "third_party/java/jetty/jetty-jmx-9.2.13.v20150730.jar",
+   "third_party/java/jetty/jetty-security-9.2.13.v20150730.jar",
+   "third_party/java/jetty/jetty-server-9.2.13.v20150730.jar",
+   "third_party/java/jetty/jetty-servlet-9.2.13.v20150730.jar",
+   "third_party/java/jetty/jetty-servlets-9.2.13.v20150730.jar",
+   "third_party/java/jetty/jetty-util-9.2.13.v20150730.jar"
+ ] do |t|
+   print "Repacking jetty\n"
+   root = File.join("build", "third_party", "java", "jetty")
+   jarjar = File.join("third_party", "java", "jarjar", "jarjar-1.4.jar")
+   rules = File.join("third_party", "java", "jetty", "jetty-repack-rules")
+   temp = File.join(root, "temp")
+
+   # First, process the files
+   mkdir_p root
+   mkdir_p temp
+
+   t.prerequisites.each do |pre|
+     filename = File.basename(pre, ".jar")
+     out = File.join(root, "#{filename}-repacked.jar")
+     `java -jar #{jarjar} process #{rules} #{pre} #{out}`
+     `cd #{temp} && jar xf #{File.join("..", File.basename(out))}`
+   end
+
+   # Now, merge them
+   `cd #{temp} && jar cvf #{File.join("..", "jetty-repacked.jar")} *`
+
+   # And copy the artifact to third_party so that eclipse users can be made happy
+   cp "build/third_party/java/jetty/jetty-repacked.jar", "third_party/java/jetty/jetty-repacked.jar"
+end
+
+task
+
 task :release => [
     :clean,
+    :build,
     '//java/server/src/org/openqa/selenium/server:server:zip',
     '//java/server/src/org/openqa/grid/selenium:selenium:zip',
     '//java/client/src/org/openqa/selenium:client-combined:zip',
@@ -509,6 +572,57 @@ task :release => [
   cp "build/java/server/src/org/openqa/grid/selenium/selenium-standalone.jar", "build/dist/selenium-server-standalone-#{version}.jar"
   cp "build/java/server/src/org/openqa/grid/selenium/selenium.zip", "build/dist/selenium-server-#{version}.zip"
   cp "build/java/client/src/org/openqa/selenium/client-combined.zip", "build/dist/selenium-java-#{version}.zip"
+end
+
+task "release-v3" => [
+    :clean,
+    :build,
+    '//java/server/src/org/openqa/selenium/remote/server:server:zip',
+    '//java/server/src/org/openqa/grid/selenium:selenium-v3:zip',
+    '//java/client/src/org/openqa/selenium:client-combined-v3-without-htmlunit:zip',
+    '//java/client/src/org/openqa/selenium:client-combined-v3:zip',
+  ] do |t|
+  # Unzip each of the deps and rename the pieces that need renaming
+  renames = {
+    "client-combined-v3-nodeps-srcs.jar" => "selenium-java-v3-#{version}-srcs.jar",
+    "client-combined-v3-nodeps.jar" => "selenium-java-v3-#{version}.jar",
+    "selenium-v3-nodeps-srcs.jar" => "selenium-server-v3-#{version}-srcs.jar",
+    "selenium-v3-nodeps.jar" => "selenium-server-v3-#{version}.jar",
+    "selenium-v3-standalone.jar" => "selenium-server-v3-standalone-#{version}.jar",
+  }
+
+  t.prerequisites.each do |pre|
+    zip = Rake::Task[pre].out
+
+    next unless zip =~ /\.zip$/
+
+    temp =  zip + "rename"
+    rm_rf temp
+    deep = File.join(temp, "/selenium-#{version}")
+    mkdir_p deep
+    cp "java/CHANGELOG", deep
+    cp "NOTICE", deep
+    cp "LICENSE", deep
+
+    sh "cd #{deep} && jar xf ../../#{File.basename(zip)}"
+    renames.each do |from, to|
+      src = File.join(deep, from)
+      next unless File.exists?(src)
+
+      mv src, File.join(deep, to)
+    end
+    rm_f File.join(deep, "client-combined-v3-standalone.jar")
+    rm zip
+    sh "cd #{temp} && jar cMf ../#{File.basename(zip)} *"
+
+    rm_rf temp
+  end
+
+  mkdir_p "build/dist"
+  cp "build/java/server/src/org/openqa/grid/selenium/selenium-v3-standalone.jar", "build/dist/selenium-server-v3-standalone-#{version}.jar"
+  cp "build/java/server/src/org/openqa/grid/selenium/selenium-v3.zip", "build/dist/selenium-server-v3-#{version}.zip"
+  cp "build/java/client/src/org/openqa/selenium/client-combined-v3.zip", "build/dist/selenium-java-v3-#{version}.zip"
+  cp "build/java/client/src/org/openqa/selenium/client-combined-v3-without-htmlunit.zip", "build/dist/selenium-java-v3-without-htmlunit-#{version}.zip"
 end
 
 task :push_release => [:release] do

@@ -16,6 +16,7 @@
 
 #include "IEServer.h"
 #include "IESession.h"
+#include "FileUtilities.h"
 #include "logging.h"
 
 namespace webdriver {
@@ -25,9 +26,10 @@ IEServer::IEServer(int port,
                    const std::string& log_level,
                    const std::string& log_file,
                    const std::string& version,
-                   const std::string& driver_implementation) : Server(port, host, log_level, log_file) {
+                   const std::string& driver_implementation,
+                   const std::string& acl) : Server(port, host, log_level, log_file, acl) {
   LOG(TRACE) << "Entering IEServer::IEServer";
-
+  LOG(INFO) << "Driver version: " << version;
   this->version_ = version;
   this->driver_implementation_ = driver_implementation;
 }
@@ -51,15 +53,7 @@ std::string IEServer::GetStatus() {
   ::ZeroMemory(&system_info, sizeof(SYSTEM_INFO));
   ::GetNativeSystemInfo(&system_info);
 
-  OSVERSIONINFO os_version_info;
-  ::ZeroMemory(&os_version_info, sizeof(OSVERSIONINFO));
-  os_version_info.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-  ::GetVersionEx(&os_version_info);
-
-  std::string major_version = std::to_string(static_cast<long long>(os_version_info.dwMajorVersion));
-  std::string minor_version = std::to_string(static_cast<long long>(os_version_info.dwMinorVersion));
-  std::string build_version = std::to_string(static_cast<long long>(os_version_info.dwBuildNumber));
-  std::string os_version = major_version + "." + minor_version + "." + build_version;
+  std::string os_version = FileUtilities::GetFileVersion("kernel32.dll");
 
   std::string arch = "x86";
   if (system_info.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64) {

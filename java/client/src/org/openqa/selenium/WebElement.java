@@ -28,7 +28,7 @@ import java.util.List;
  * fails, then an {@link org.openqa.selenium.StaleElementReferenceException} is thrown, and all
  * future calls to this instance will fail.
  */
-public interface WebElement extends SearchContext {
+public interface WebElement extends SearchContext, TakesScreenshot {
   /**
    * Click this element. If this causes a new page to load, you
    * should discard all references to this element and any further
@@ -61,6 +61,8 @@ public interface WebElement extends SearchContext {
 
   /**
    * Use this method to simulate typing into an element, which may set its value.
+   *
+   * @param keysToSend character sequence to send to the element
    */
   void sendKeys(CharSequence... keysToSend);
 
@@ -193,6 +195,11 @@ public interface WebElement extends SearchContext {
   Dimension getSize();
 
   /**
+   * @return The location and size of the rendered element
+   */
+  Rectangle getRect();
+
+  /**
    * Get the value of a given CSS property.
    * Color values should be returned as rgba strings, so,
    * for example if the "background-color" property is set as "green" in the
@@ -205,6 +212,7 @@ public interface WebElement extends SearchContext {
    * - you should directly access the longhand properties (e.g. background-color) to access the
    * desired values.
    *
+   * @param propertyName the css property name of the element
    * @return The current, computed value of the property.
    */
   String getCssValue(String propertyName);

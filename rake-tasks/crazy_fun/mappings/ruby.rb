@@ -88,11 +88,17 @@ class RubyMappings
   class RubyTest < Tasks
     def handle(fun, dir, args)
       desc "Run ruby tests for #{args[:name]}"
-      task task_name(dir, "#{args[:name]}-test") do
+      task task_name(dir, "#{args[:name]}-test") => %W[//#{dir}:bundle] do
         STDOUT.sync = true
         puts "Running: #{args[:name]} ruby tests"
 
-        ENV['WD_SPEC_DRIVER'] = args[:name]
+        if args[:name].match /^remote-(.*)/
+          ENV['WD_REMOTE_BROWSER'] = $1
+          ENV['WD_SPEC_DRIVER'] = 'remote'
+        else
+          ENV['WD_SPEC_DRIVER'] = args[:name]
+        end
+
         ENV['CI_REPORTS']     = "build/test_logs"
 
         ruby :include => args[:include],
@@ -106,31 +112,25 @@ class RubyMappings
     end
   end
 
-  class RubyDocs
+  class RubyDocs < Tasks
     def handle(fun, dir, args)
-      files      = args[:files] || raise("no :files specified for rubydocs")
+      files = args[:files] || raise("no :files specified for rubydocs")
       output_dir = args[:output_dir] || raise("no :output_dir specified for rubydocs")
+      readme = args[:readme] || raise("no :readme specified for rubydocs")
 
-      # we define a wrapper task to avoid calling require "yard" at parse time
       desc 'Generate Ruby API docs'
-      task "//#{dir}:docs" do |t|
-        raise "yard is not installed, unable to generate docs" unless have_yard?
-        task = YARD::Rake::YardocTask.new { |yard|
-          yard.files = Array(files).map { |glob| Dir[glob] }.flatten
-          yard.options << "--verbose"
-          yard.options << "--readme" << args[:readme] if args.has_key?(:readme)
-          yard.options << "--output-dir" << output_dir
-        }
+      t = task "//#{dir}:docs" do |t|
+        yard_args = %w[doc --verbose]
+        yard_args += ["--output-dir", output_dir]
+        yard_args += ["--readme", readme]
 
-        Rake::Task[task.name].invoke
+        ruby :command => "yard",
+             :args    => yard_args,
+             :files   => files,
+             :gemfile => "build/rb/Gemfile"
       end
-    end
 
-    def have_yard?
-      require 'yard'
-      true
-    rescue LoadError
-      false
+      add_dependencies t, dir, args[:deps]
     end
   end # RubyDocs
 
@@ -182,6 +182,7 @@ class RubyMappings
       desc 'Install gem dependencies for the current Ruby'
       task "//#{dir}:bundle" do
         ENV['BUNDLE_GEMFILE'] = 'rb/Gemfile'
+        sh "gem install bundler"
         sh "bundle", "install"
       end
     end

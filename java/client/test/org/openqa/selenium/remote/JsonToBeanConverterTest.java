@@ -171,7 +171,7 @@ public class JsonToBeanConverterTest {
   @Test
   public void testShouldConvertAResponseWithAnElementInIt() throws Exception {
     String json =
-        "{\"value\":{\"value\":\"\",\"text\":\"\",\"selected\":false,\"enabled\":true,\"id\":\"three\"},\"context\":\"con\",\"sessionId\":\"sess\",\"error\":false}";
+        "{\"value\":{\"value\":\"\",\"text\":\"\",\"selected\":false,\"enabled\":true,\"id\":\"three\"},\"context\":\"con\",\"sessionId\":\"sess\"}";
     Response converted = new JsonToBeanConverter().convert(Response.class, json);
 
     Map<?,?> value = (Map<?,?>) converted.getValue();
@@ -188,7 +188,7 @@ public class JsonToBeanConverterTest {
   @Test
   public void testShouldBeAbleToCopeWithStringsThatLookLikeBooleans() throws Exception {
     String json =
-        "{\"value\":\"false\",\"context\":\"foo\",\"sessionId\":\"1210083863107\",\"error\":false}";
+        "{\"value\":\"false\",\"context\":\"foo\",\"sessionId\":\"1210083863107\"}";
 
     try {
       new JsonToBeanConverter().convert(Response.class, json);
@@ -201,7 +201,7 @@ public class JsonToBeanConverterTest {
   @Test
   public void testShouldBeAbleToSetAnObjectToABoolean() throws Exception {
     String json =
-        "{\"value\":true,\"context\":\"foo\",\"sessionId\":\"1210084658750\",\"error\":false}";
+        "{\"value\":true,\"context\":\"foo\",\"sessionId\":\"1210084658750\"}";
 
     Response response = new JsonToBeanConverter().convert(Response.class, json);
 
@@ -222,7 +222,7 @@ public class JsonToBeanConverterTest {
 
     assertEquals("bar", response.getSessionId());
     assertEquals(2, ((List<?>) converted.getValue()).size());
-    assertEquals(1512, response.getStatus());
+    assertEquals(1512, response.getStatus().intValue());
   }
 
   @Test
@@ -385,7 +385,7 @@ public class JsonToBeanConverterTest {
     Response response = new JsonToBeanConverter()
       .convert(Response.class, "{\"status\":0,\"value\":\"cheese\"}");
 
-    assertEquals(0, response.getStatus());
+    assertEquals(0, response.getStatus().intValue());
     assertEquals(ErrorCodes.toState(0), response.getState());
     @SuppressWarnings("unchecked")
     String value = (String) response.getValue();
@@ -397,7 +397,7 @@ public class JsonToBeanConverterTest {
     Response response = new JsonToBeanConverter()
       .convert(Response.class, "{\"status\":\"success\",\"value\":\"cheese\"}");
 
-    assertEquals(0, response.getStatus());
+    assertEquals(0, response.getStatus().intValue());
     assertEquals(ErrorCodes.toState(0), response.getState());
     @SuppressWarnings("unchecked")
     String value = (String) response.getValue();
@@ -410,10 +410,17 @@ public class JsonToBeanConverterTest {
       .convert(Response.class, "{\"state\":\"success\",\"value\":\"cheese\"}");
 
     assertEquals("success", response.getState());
-    assertEquals(0, response.getStatus());
+    assertEquals(0, response.getStatus().intValue());
     @SuppressWarnings("unchecked")
     String value = (String) response.getValue();
     assertEquals("cheese", value);
+  }
+
+  @Test
+  public void testNoStatusShouldBeNullInResponseObject() {
+    Response response = new JsonToBeanConverter()
+      .convert(Response.class, "{\"value\":\"cheese\"}");
+    assertNull(response.getStatus());
   }
 
   public static class SimpleBean {

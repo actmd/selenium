@@ -59,12 +59,25 @@ namespace OpenQA.Selenium.Remote
         }
 
         /// <summary>
+        /// Gets the <see cref="CommandInfoRepository"/> object associated with this executor.
+        /// </summary>
+        public CommandInfoRepository CommandInfoRepository
+        {
+            get { return this.internalExecutor.CommandInfoRepository; }
+        }
+
+        /// <summary>
         /// Executes a command
         /// </summary>
         /// <param name="commandToExecute">The command you wish to execute</param>
         /// <returns>A response from the browser</returns>
         public Response Execute(Command commandToExecute)
         {
+            if (commandToExecute == null)
+            {
+                throw new ArgumentNullException("commandToExecute", "Command to execute cannot be null");
+            }
+
             Response toReturn = null;
             if (commandToExecute.Name == DriverCommand.NewSession)
             {

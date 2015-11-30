@@ -28,13 +28,19 @@ namespace OpenQA.Selenium
         public void ShouldFollowMetaRedirects()
         {
             driver.Url = metaRedirectPage;
-            WaitFor(() => { return driver.Title == "We Arrive Here"; });
+            WaitFor(() => { return driver.Title == "We Arrive Here"; }, "Browser title was not 'We Arrive Here'");
             Assert.AreEqual(driver.Title, "We Arrive Here");
         }
 
         [Test]
         public void ShouldBeAbleToGetAFragmentOnTheCurrentPage()
         {
+            if (TestUtilities.IsMarionette(driver))
+            {
+                // Don't run this test on Marionette.
+                Assert.Ignore("Marionette doesn't see subsequent navigation to a fragment as a new navigation.");
+            }
+
             driver.Url = xhtmlTestPage;
             driver.Url = xhtmlTestPage + "#text";
             driver.FindElement(By.Id("id1"));
@@ -59,12 +65,35 @@ namespace OpenQA.Selenium
         }
 
         [Test]
+        [IgnoreBrowser(Browser.IE, "IE happily will navigate to invalid URLs")]
+        [IgnoreBrowser(Browser.IPhone)]
+        [IgnoreBrowser(Browser.Safari, "Hangs Safari driver")]
+        public void ShouldThrowIfUrlIsMalformed()
+        {
+            if (TestUtilities.IsMarionette(driver))
+            {
+                // Don't run this test on Marionette.
+                Assert.Ignore("Browser hangs when executed via Marionette");
+            }
+
+            driver.Url = "www.test.com";
+        }
+
+        [Test]
         [IgnoreBrowser(Browser.IPhone)]
         [IgnoreBrowser(Browser.Safari, "Hangs Safari driver")]
         public void ShouldReturnWhenGettingAUrlThatDoesNotConnect()
         {
             // Here's hoping that there's nothing here. There shouldn't be
             driver.Url = "http://localhost:3001";
+        }
+
+        [Test]
+        public void ShouldReturnUrlOnNotExistedPage()
+        {
+            string url = EnvironmentManager.Instance.UrlBuilder.WhereIs("not_existed_page.html");
+            driver.Url = url;
+            Assert.AreEqual(url, driver.Url);
         }
 
         [Test]
@@ -109,11 +138,11 @@ namespace OpenQA.Selenium
             driver.Url = formsPage;
 
             driver.FindElement(By.Id("imageButton")).Submit();
-            WaitFor(TitleToBeEqualTo("We Arrive Here"));
+            WaitFor(TitleToBeEqualTo("We Arrive Here"), "Browser title was not 'We Arrive Here'");
             Assert.AreEqual(driver.Title, "We Arrive Here");
 
             driver.Navigate().Back();
-            WaitFor(TitleToBeEqualTo("We Leave From Here"));
+            WaitFor(TitleToBeEqualTo("We Leave From Here"), "Browser title was not 'We Leave From Here'");
             Assert.AreEqual(driver.Title, "We Leave From Here");
         }
 
@@ -124,11 +153,11 @@ namespace OpenQA.Selenium
             driver.Url = xhtmlTestPage;
 
             driver.FindElement(By.Name("sameWindow")).Click();
-            WaitFor(TitleToBeEqualTo("This page has iframes"));
+            WaitFor(TitleToBeEqualTo("This page has iframes"), "Browser title was not 'This page has iframes'");
             Assert.AreEqual(driver.Title, "This page has iframes");
 
             driver.Navigate().Back();
-            WaitFor(TitleToBeEqualTo("XHTML Test Page"));
+            WaitFor(TitleToBeEqualTo("XHTML Test Page"), "Browser title was not 'XHTML Test Page'");
             Assert.AreEqual(driver.Title, "XHTML Test Page");
         }
 
@@ -140,15 +169,15 @@ namespace OpenQA.Selenium
             driver.Url = formsPage;
 
             driver.FindElement(By.Id("imageButton")).Submit();
-            WaitFor(TitleToBeEqualTo("We Arrive Here"));
+            WaitFor(TitleToBeEqualTo("We Arrive Here"), "Browser title was not 'We Arrive Here'");
             Assert.AreEqual(driver.Title, "We Arrive Here");
 
             driver.Navigate().Back();
-            WaitFor(TitleToBeEqualTo("We Leave From Here"));
+            WaitFor(TitleToBeEqualTo("We Leave From Here"), "Browser title was not 'We Leave From Here'");
             Assert.AreEqual(driver.Title, "We Leave From Here");
 
             driver.Navigate().Forward();
-            WaitFor(TitleToBeEqualTo("We Arrive Here"));
+            WaitFor(TitleToBeEqualTo("We Arrive Here"), "Browser title was not 'We Arrive Here'");
             Assert.AreEqual(driver.Title, "We Arrive Here");
         }
 
@@ -185,6 +214,12 @@ namespace OpenQA.Selenium
         [IgnoreBrowser(Browser.Safari, "Untested user-agent")]
         public void ShouldNotHangIfDocumentOpenCallIsNeverFollowedByDocumentCloseCall()
         {
+            if (TestUtilities.IsMarionette(driver))
+            {
+                // Don't run this test on Marionette.
+                Assert.Ignore("Browser hangs when executed via Marionette");
+            }
+
             driver.Url = documentWrite;
 
             // If this command succeeds, then all is well.

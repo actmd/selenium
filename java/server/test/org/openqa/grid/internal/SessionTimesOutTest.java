@@ -28,7 +28,7 @@ import static org.openqa.grid.common.RegistrationRequest.CLEAN_UP_CYCLE;
 import static org.openqa.grid.common.RegistrationRequest.ID;
 import static org.openqa.grid.common.RegistrationRequest.TIME_OUT;
 
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.grid.common.RegistrationRequest;
 import org.openqa.grid.internal.listeners.TimeoutListener;
@@ -41,17 +41,17 @@ import java.util.Map;
 
 public class SessionTimesOutTest {
 
-  private static RegistrationRequest req = new RegistrationRequest();
-  private static Map<String, Object> app1 = new HashMap<String, Object>();
+  private RegistrationRequest req = new RegistrationRequest();
+  private Map<String, Object> app1 = new HashMap<>();
 
   // create a request for a proxy that times out after 0.5 sec.
-  @BeforeClass
-  public static void setup() {
+  @Before
+  public void setup() {
 
     app1.put(APP, "app1");
     req.addDesiredCapability(app1);
 
-    Map<String, Object> config = new HashMap<String, Object>();
+    Map<String, Object> config = new HashMap<>();
     // a test is timed out is inactive for more than 0.5 sec.
     config.put(TIME_OUT, 50);
 
@@ -152,7 +152,6 @@ public class SessionTimesOutTest {
       newSessionRequest2.process();
       TestSession session2 = newSessionRequest2.getSession();
       assertNotNull(session2);
-      assertTrue(session.equals(session));
       assertFalse(session2.equals(session));
 
     } finally {
@@ -223,7 +222,7 @@ public class SessionTimesOutTest {
         {5, 5},
         // and invalid ones
         {-1, 5}, {5, -1}, {-1, -1}, {0, 0}};
-    java.util.List<Registry> registryList = new ArrayList<Registry>();
+    java.util.List<Registry> registryList = new ArrayList<>();
     try {
       for (Object[] c : configs) {
         int timeout = (Integer) c[0];
@@ -232,10 +231,10 @@ public class SessionTimesOutTest {
         registryList.add(registry);
 
         RegistrationRequest req = new RegistrationRequest();
-        Map<String, Object> app1 = new HashMap<String, Object>();
+        Map<String, Object> app1 = new HashMap<>();
         app1.put(APP, "app1");
         req.addDesiredCapability(app1);
-        Map<String, Object> config = new HashMap<String, Object>();
+        Map<String, Object> config = new HashMap<>();
 
         config.put(TIME_OUT, timeout);
         config.put(CLEAN_UP_CYCLE, cycle);

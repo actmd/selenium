@@ -20,7 +20,6 @@ package org.openqa.selenium;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.openqa.selenium.support.ui.ExpectedConditions.stalenessOf;
-import static org.openqa.selenium.testing.Ignore.Driver.MARIONETTE;
 
 import org.junit.Test;
 import org.openqa.selenium.testing.Ignore;
@@ -74,7 +73,6 @@ public class StaleElementReferenceTest extends JUnit4TestBase {
 
   @JavascriptEnabled
   @Test
-  @Ignore(MARIONETTE)
   public void testRemovingAnElementDynamicallyFromTheDomShouldCauseAStaleRefException() {
     driver.get(pages.javascriptPage);
 
@@ -85,19 +83,5 @@ public class StaleElementReferenceTest extends JUnit4TestBase {
 
     boolean wasStale = wait.until(stalenessOf(toBeDeleted));
     assertTrue("Element should be stale at this point", wasStale);
-  }
-
-  private Callable<Boolean> elementToBeStale(final WebElement element) {
-    return new Callable<Boolean>() {
-
-      public Boolean call() throws Exception {
-        try {
-          element.isDisplayed();
-          return false;
-        } catch (StaleElementReferenceException e) {
-          return true;
-        }
-      }
-    };
   }
 }

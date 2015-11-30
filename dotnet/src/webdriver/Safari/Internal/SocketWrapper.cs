@@ -36,14 +36,31 @@ namespace OpenQA.Selenium.Safari.Internal
         private readonly Socket underlyingSocket;
         private bool disposed;
         private Stream stream;
-        
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SocketWrapper"/> class.
+        /// </summary>
+        public SocketWrapper()
+        {
+            this.underlyingSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
+            if (this.underlyingSocket.Connected)
+            {
+                this.stream = new NetworkStream(this.underlyingSocket);
+            }
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="SocketWrapper"/> class.
         /// </summary>
         /// <param name="socket">The <see cref="Socket"/> to wrap.</param>
         public SocketWrapper(Socket socket)
         {
-            this.underlyingSocket = socket;
+            if (socket == null)
+            {
+                throw new ArgumentNullException("socket", "Socket to wrap must not be null");
+            }
+
+            this.underlyingSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
             if (this.underlyingSocket.Connected)
             {
                 this.stream = new NetworkStream(this.underlyingSocket);
@@ -132,6 +149,11 @@ namespace OpenQA.Selenium.Safari.Internal
         /// <param name="buffer">The data to be sent.</param>
         public void Send(byte[] buffer)
         {
+            if (buffer == null)
+            {
+                throw new ArgumentNullException("buffer", "Buffer to send must not be null");
+            }
+
             this.stream.BeginWrite(buffer, 0, buffer.Length, this.OnDataSend, null);
         }
 
@@ -142,6 +164,11 @@ namespace OpenQA.Selenium.Safari.Internal
         /// <param name="offset">The offset into the buffer at which the data will be read.</param>
         public void Receive(byte[] buffer, int offset)
         {
+            if (buffer == null)
+            {
+                throw new ArgumentNullException("buffer", "Buffer to receive must not be null");
+            }
+
             this.stream.BeginRead(buffer, offset, buffer.Length, this.OnDataReceive, buffer);
         }
 
@@ -296,10 +323,10 @@ namespace OpenQA.Selenium.Safari.Internal
         }
 
         /// <summary>
-        /// Releases the unmanaged resources used by the <see cref="SocketWrapper"/> and optionally 
+        /// Releases the unmanaged resources used by the <see cref="SocketWrapper"/> and optionally
         /// releases the managed resources.
         /// </summary>
-        /// <param name="disposing"><see langword="true"/> to release managed and resources; 
+        /// <param name="disposing"><see langword="true"/> to release managed and resources;
         /// <see langword="false"/> to only release unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {

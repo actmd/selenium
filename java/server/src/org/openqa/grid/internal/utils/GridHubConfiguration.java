@@ -17,9 +17,6 @@
 
 package org.openqa.grid.internal.utils;
 
-import static org.openqa.grid.internal.utils.ServerJsonValues.BROWSER_TIMEOUT;
-import static org.openqa.grid.internal.utils.ServerJsonValues.CLIENT_TIMEOUT;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -73,12 +70,12 @@ public class GridHubConfiguration {
    * list of extra servlets this hub will display. Allows to present custom view of the hub for
    * monitoring and management purpose
    */
-  private List<String> servlets = new ArrayList<String>();
+  private List<String> servlets = new ArrayList<>();
 
   /**
    * name <-> browser mapping from grid1
    */
-  private Map<String, String> grid1Mapping = new HashMap<String, String>();
+  private Map<String, String> grid1Mapping = new HashMap<>();
 
   /**
    * to specify the order in which the new session request will be handled.
@@ -106,12 +103,8 @@ public class GridHubConfiguration {
    * max number of thread for Jetty. Default is normally 255.
    */
   private int jettyMaxThreads = -1;
-  /**
-   * to specify that logging level should be set to Level.DEBUG
-   */
-  private boolean isDebug = false;
 
-  private Map<String, Object> allParams = new HashMap<String, Object>();
+  private Map<String, Object> allParams = new HashMap<>();
 
   /**
    * original command line param, useful for debugging
@@ -128,7 +121,7 @@ public class GridHubConfiguration {
   /**
    * builds a grid configuration from the parameters passed command line.
    *
-   * @param args
+   * @param args command line arguments
    * @return A GridHubConfiguration object with options from the grid1 and/or
    *         grid2 config file(s), plus any command line option overrides.
    */
@@ -194,11 +187,11 @@ public class GridHubConfiguration {
     if (helper.isParamPresent("-cleanUpCycle")) {
       cleanupCycle = Integer.parseInt(helper.getParamValue("-cleanUpCycle"));
     }
-    if (helper.isParamPresent(CLIENT_TIMEOUT.getAsParam())) {
-      setTimeout(Integer.parseInt(helper.getParamValue(CLIENT_TIMEOUT.getAsParam())) * 1000);
+    if (helper.isParamPresent("-timeout")) {
+      setTimeout(Integer.parseInt(helper.getParamValue("-timeout")) * 1000);
     }
-    if (helper.isParamPresent(BROWSER_TIMEOUT.getAsParam())) {
-      setBrowserTimeout(Integer.parseInt(helper.getParamValue(BROWSER_TIMEOUT.getAsParam())) * 1000);
+    if (helper.isParamPresent("-browserTimeout")) {
+      setBrowserTimeout(Integer.parseInt(helper.getParamValue("-browserTimeout")) * 1000);
     }
     if (helper.isParamPresent("-newSessionWaitTimeout")) {
       newSessionWaitTimeout = Integer.parseInt(helper.getParamValue("-newSessionWaitTimeout"));
@@ -219,10 +212,6 @@ public class GridHubConfiguration {
     if (helper.isParamPresent("-log")) {
       logFilename = helper.getParamValue("-log");
     }
-    if (helper.isParamPresent("-debug")) {
-      isDebug = true;
-    }
-
   }
 
   /**
@@ -360,15 +349,15 @@ public class GridHubConfiguration {
   }
 
   public int getTimeout() {
-    return getIntWith0Default(CLIENT_TIMEOUT);
+    return getIntWith0Default(RegistrationRequest.TIME_OUT);
   }
 
   public int getBrowserTimeout() {
-    return getIntWith0Default(BROWSER_TIMEOUT);
+    return getIntWith0Default(RegistrationRequest.BROWSER_TIME_OUT);
   }
 
   public void setBrowserTimeout(int browserTimeout) {
-      put(BROWSER_TIMEOUT, browserTimeout);
+      put(RegistrationRequest.BROWSER_TIME_OUT, browserTimeout);
   }
 
   public int getNewSessionWaitTimeout() {
@@ -381,10 +370,6 @@ public class GridHubConfiguration {
 
   public String getLogFilename() {
     return logFilename;
-  }
-
-  public boolean isDebug() {
-    return isDebug;
   }
 
   public Map<String, String> getGrid1Mapping() {
@@ -416,21 +401,16 @@ public class GridHubConfiguration {
   }
 
   public void setTimeout(int timeout) {
-    put(CLIENT_TIMEOUT, timeout);
+    put(RegistrationRequest.TIME_OUT, timeout);
   }
 
-  private void put(JsonKey key, Object value){
-    allParams.put(key.getKey(), value);
+  private void put(String key, Object value){
+    allParams.put(key, value);
   }
 
-  private <T> T get(JsonKey jsonKey) {
+  private Integer getIntWith0Default(String jsonKey) {
     //noinspection unchecked
-    return (T) allParams.get(jsonKey.getKey());
-  }
-
-  private Integer getIntWith0Default(JsonKey jsonKey) {
-    //noinspection unchecked
-    final Object o = allParams.get(jsonKey.getKey());
+    final Object o = allParams.get(jsonKey);
     if (o instanceof  String){
       return Integer.parseInt((String) o);
     }
@@ -510,7 +490,7 @@ public class GridHubConfiguration {
     }
     b.append("\n\n");
     b.append("all params :\n");
-    List<String> keys = new ArrayList<String>();
+    List<String> keys = new ArrayList<>();
     keys.addAll(allParams.keySet());
     Collections.sort(keys);
     for (String s : keys) {

@@ -9,6 +9,168 @@ available via the project downloads page. Changes in "revision" field indicate
 private releases checked into the prebuilts directory of the source tree, but
 not made generally available on the downloads page.
 
+v2.48.0.4
+=========
+ * Added ability to set whitelisted IP addresses to access IE driver server.
+   The list of IP addresses is a comma-delimited list passed to the
+   /whitelisted-ips command-line argument. Defaults to local loopback address
+   only. Also improved logging to show executable version and architecture in
+   driver log. Patch provided by lsowen.
+
+v2.48.0.3
+=========
+ * Updates to JavaScript automation atoms.
+ * Modifications to file upload functionality. Added additional logging
+   to help diagnose issues where the file selection dialog is not closed
+   by the driver. Also added a new capability, ie.fileUploadDialogTimeout
+   to allow users to customize the amount of time the driver waits for
+   the file selection dialog before giving up. It defaults to one second.
+   Finally, the driver now checks that the file exists before sending the
+   file name to the file selection dialog. If the file does not exist,
+   the sendKeys method will throw an exception explicitly stating that
+   the file does not exist.
+
+v2.48.0.2
+=========
+ * Updates to JavaScript automation atoms.
+ * Includes fix for clearing input elements with type "number".
+
+v2.48.0.1
+=========
+ * Updating to return top-level URL when focused on a frame. This makes the
+   driver now consistent with other implementations.
+
+v2.48.0.0
+=========
+ * Release to synchronize with release of Selenium project.
+
+v2.47.0.5
+=========
+ * Updating screenshot code to retain scroll bars in required directions.
+   When an IE window needs to be resized to obtain the full-DOM screenshot,
+   if it has scroll bars in either direction, those scroll bars need to be
+   present in the resized window, so that layout recalculation doesn't occur.
+   In practice, this means reducing the window size by 2 pixels in the
+   appropriate direction before taking the screenshot. The resulting scroll
+   bars are cropped from the image.
+
+v2.47.0.4
+=========
+ * Updates to JavaScript automation atoms.
+ * Updating screenshot code to prevent resizing if window is large enough.
+   In the previous screenshot update, the driver would incorrectly resize
+   the IE window smaller if the document was smaller in height or width
+   than the current window size. This could cause redraws of the page
+   being viewed such that after resizing, the screenshot still did not
+   display the entire page. This commit resolves that issue, and also takes
+   into account the size of the scroll bars when creating the screenshot
+   image. NOTE: There is a *very* slight chance that resizing the window
+   so there are no longer scroll bars to be displayed *might* still cause
+   layout redraws such that the screenshot does not show the entire DOM
+   after the resize. Since we should now always be expanding the window size,
+   never contracting it, this is a corner case that explicitly will *not* be
+   fixed. Any issue reports describing this corner case will be closed without
+   action. Fixes issue #1085.
+
+v2.47.0.3
+=========
+ * Updates to JavaScript automation atoms.
+ * Removed use of Windows hooks for taking screenshots in IE. This will fix
+   the issue of taking full-page screenshots when using the 32-bit IE driver
+   on 64-bit Windows installations.
+
+v2.47.0.2
+=========
+ * Corrected build process to create executables runnable on Windows XP.
+
+v2.47.0.1
+=========
+ * Added logging messages for IE driver for bitness mismatches. This commit
+   adds logging messages at the warning level whenever a mismatch in bitness
+   is detected between the browser and driver. This is a particularly bad
+   problem in cases where users have 64-bit Windows, and (incorrectly) assume
+   they automatically should use the 64-bit IEDriverServer.exe when running
+   with IE 10 or 11. Since the process that actually renders content in IE 10
+   and 11 is almost always 32-bit, even on 64-bit Windows, it is almost always
+   the proper decision to use the 32-bit IE driver. It is now very clear from
+   log messages when this state of affairs exists.
+ * Enabled fast failure for cookie manipulation in IE. The refactor of cookie
+   handling for the IE driver introduces an incompatibility with the 64-bit IE
+   driver and IE 10 and 11 running on 64-bit Windows. As is the case with
+   sending keystrokes and creating screenshots, a Windows hook procedure is now
+   used for getting and settingcookies in IE. That means that in IE 10 and 11
+   on 64-bit Windows, where the content rendering process is still 32-bit, you
+   **must** use the 32-bit IEDriverServer.exe in order to manipulate cookies.
+   This commit will now cause exceptions to be thrown if you attempt to set
+   or get cookies using the 64-bit driver against a 32-bit version of IE (or
+   vice versa), but in particular, this will affect users who mistakenly try
+   to use the 64-bit executable with IE 10 or 11 in 64-bit Windows.
+
+v2.47.0.0
+=========
+ * Release to synchronize with release of Selenium project.
+ * Updates to JavaScript automation atoms.
+
+v2.46.0.12
+==========
+ * Fixed handling of authentication dialogs for different Windows versions.
+
+v2.46.0.11
+==========
+ * Enabling handling of authentication dialogs in IE driver.
+ * Modified to resize IE window for screenshots using dimensions of top-level
+   document when focused on a frame. Fixes issue #703.
+
+v2.46.0.10
+==========
+ * Init last known mouse position with -1, -1. This avoids issues where the
+   first operation is to move the mouse to [0, 0]. Patch provided by Anton
+   Usmansky.
+
+v2.46.0.9
+=========
+ * Fixed bug in SOCKS proxy authentication settings retrieval.
+
+v2.46.0.8
+=========
+ * Fixed bug in screenshot handling due to Windows hook refactor.
+
+v2.46.0.7
+=========
+ * Fixed cookie delete bug for related domains.
+
+v2.46.0.6
+=========
+ * Corrected cookie add/delete logic with respect to HTTP-only cookies.
+
+v2.46.0.5
+=========
+ * Updates to JavaScript automation atoms.
+ * Updated delete cookie logic to no longer rely on JavaScript. This allows
+   HTTP-only cookies to be deleted by the driver.
+ * Added support for SOCKS proxy in the IE driver. Using a SOCKS proxy is not
+   quite as straightforward for IE as it is for other browser drivers. While
+   the driver is now able to set the proxy settings for a SOCKS proxy, using
+   the ie.usePerProcessProxy capability with a user name and password for a
+   SOCKS proxy is problematic for the driver. The Windows API does not provide
+   any ability to set the user name and password for a SOCKS proxy on a
+   per-process basis. The driver attempts to work around this limitation, but
+   this combination will be largely unsupported. Using the driver to temporarily
+   set the global proxy settings on the machine should work as normal.
+
+v2.46.0.4
+=========
+ * Corrected logic for http-only and secure cookies. Cookies now behave
+   in IE as expected. The driver will properly return 'secure' or
+   'httpOnly' flags as set on the cookie itself. Note carefully that
+   'secure' cookies will only be retrieved when browsing a page using
+   SSL (https), as this is the only environment where the cookies are
+   used by the browser. This behavior is consistent with the behavior
+   of the Chrome driver, and with the W3C specification behavior for
+   cookies. Firefox, it should be noted, returns secure cookies regardless
+   of whether the page in question is being browsed via SSL or not.
+   This is a bug in the Firefox driver.
+
 v2.46.0.3
 =========
  * Fixed IE cookie handling for down-level operating systems.

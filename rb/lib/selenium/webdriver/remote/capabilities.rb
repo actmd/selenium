@@ -74,11 +74,19 @@ module Selenium
             new({
               :browser_name          => "chrome",
               :javascript_enabled    => true,
-              :css_selectors_enabled => true
-            }.merge(opts))
+              :css_selectors_enabled => true,
+              :loggingPrefs => {:browser => "ALL",
+                                :driver => "ALL"}
+                }.merge(opts))
+          end
+
+          def edge(opts = {})
+            W3CCapabilities.edge(opts)
           end
 
           def firefox(opts = {})
+            return W3CCapabilities.firefox(opts) if opts[:marionette]
+
             new({
               :browser_name          => "firefox",
               :javascript_enabled    => true,
@@ -139,6 +147,7 @@ module Selenium
           def safari(opts = {})
             new({
               :browser_name          => "safari",
+              :platform              => :mac,
               :javascript_enabled    => true,
               :takes_screenshot      => true,
               :css_selectors_enabled => true

@@ -35,9 +35,6 @@ import org.openqa.selenium.net.NetworkUtils;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.JsonToBeanConverter;
-import org.openqa.selenium.server.RemoteControlConfiguration;
-import org.openqa.selenium.server.browserlaunchers.BrowserLauncherFactory;
-import org.openqa.selenium.server.cli.RemoteControlLauncher;
 
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
@@ -57,8 +54,8 @@ public class RegistrationRequest {
   private String description;
 
   private GridRole role;
-  private List<DesiredCapabilities> capabilities = new ArrayList<DesiredCapabilities>();
-  private Map<String, Object> configuration = new HashMap<String, Object>();
+  private List<DesiredCapabilities> capabilities = new ArrayList<>();
+  private Map<String, Object> configuration = new HashMap<>();
 
   private String[] args;
 
@@ -251,7 +248,7 @@ public class RegistrationRequest {
   /**
    * Create an object from a registration request formatted as a json string.
    *
-   * @param json
+   * @param json JSON
    * @return create a request from the JSON request received.
    */
   @SuppressWarnings("unchecked")
@@ -382,13 +379,6 @@ public class RegistrationRequest {
     res.loadFromCommandLine(args);
 
     for (DesiredCapabilities cap : res.capabilities) {
-      if (SeleniumProtocol.Selenium.toString().equals(cap.getCapability(SELENIUM_PROTOCOL))) {
-        if (!BrowserLauncherFactory.isBrowserSupported(cap.getBrowserName())) {
-          throw new GridConfigurationException("browser " + cap.getBrowserName()
-                                               + " is not supported, supported browsers are:\n"
-                                               + BrowserLauncherFactory.getSupportedBrowsersAsString());
-        }
-      }
       if (cap.getCapability(SELENIUM_PROTOCOL) == null) {
         cap.setCapability(SELENIUM_PROTOCOL,
           GridRole.isRC(nodeType)
@@ -543,14 +533,14 @@ public class RegistrationRequest {
   /**
    * add config, but overwrite capabilities.
    *
-   * @param resource
+   * @param resource resource
    */
   public void loadFromJSON(String resource) {
     try {
       JsonObject base = JSONConfigurationUtils.loadJSON(resource);
 
       if (base.has("capabilities")) {
-        capabilities = new ArrayList<DesiredCapabilities>();
+        capabilities = new ArrayList<>();
         JsonArray a = base.get("capabilities").getAsJsonArray();
         for (int i = 0; i < a.size(); i++) {
           DesiredCapabilities c = new JsonToBeanConverter()
@@ -584,18 +574,6 @@ public class RegistrationRequest {
     this.role = role;
   }
 
-  public RemoteControlConfiguration getRemoteControlConfiguration() {
-    List<String> params = new ArrayList<String>();
-    for (String key : configuration.keySet()) {
-      params.add("-" + key);
-
-      if (!configuration.get(key).toString().trim().isEmpty()) {
-        params.add("" + configuration.get(key));
-      }
-    }
-    return RemoteControlLauncher.parseLauncherOptions(params.toArray(new String[params.size()]));
-  }
-
   public String[] getArgs() {
     return args;
   }
@@ -603,7 +581,7 @@ public class RegistrationRequest {
   /**
    * Validate the current setting and throw a config exception is an invalid setup is detected.
    *
-   * @throws GridConfigurationException
+   * @throws GridConfigurationException grid configuration
    */
   public void validate() throws GridConfigurationException {
     String hub = (String) configuration.get(HUB_HOST);

@@ -19,7 +19,7 @@
  * @fileoverview Defines a WebDriver client for Safari. Before using this
  * module, you must install the
  * [latest version](http://selenium-release.storage.googleapis.com/index.html)
- * of the SafariDriver browser extension; using Safari for normal browsign is
+ * of the SafariDriver browser extension; using Safari for normal browsing is
  * not recommended once the extension has been installed. You can, and should,
  * disable the extension when the browser is not being used with WebDriver.
  */
@@ -36,7 +36,7 @@ var ws = require('ws');
 
 var webdriver = require('./');
 var promise = webdriver.promise;
-var _base = require('./_base');
+var _base = require('./lib/_base');
 var io = require('./io');
 var exec = require('./io/exec');
 var portprober = require('./net/portprober');

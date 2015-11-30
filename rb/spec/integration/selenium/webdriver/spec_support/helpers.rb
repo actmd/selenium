@@ -26,8 +26,12 @@ module Selenium
           GlobalTestEnv.driver_instance
         end
 
-        def reset_driver!
-          GlobalTestEnv.reset_driver!
+        def reset_driver!(time = 0)
+          GlobalTestEnv.reset_driver!(time)
+        end
+
+        def ensure_single_window
+          GlobalTestEnv.ensure_single_window
         end
 
         def url_for(filename)
@@ -58,6 +62,16 @@ module Selenium
         def wait_for_alert
           wait = Wait.new(:timeout => 5, :ignore => Error::NoAlertPresentError)
           wait.until { driver.switch_to.alert }
+        end
+
+        def wait_for_no_alert
+          wait = Wait.new(:timeout => 5, :ignore => Error::UnhandledAlertError)
+          wait.until { driver.title }
+        end
+
+        def wait_for_element(locator)
+          wait = Wait.new(:timeout => 25, :ignore => Error::NoSuchElementError)
+          wait.until { driver.find_element(locator) }
         end
 
         def wait(timeout = 10)
